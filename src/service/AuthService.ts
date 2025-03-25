@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const Auth = require('../model/AuthModel');
 import bcrypt from 'bcrypt/bcrypt'
 
-export async function AddUser(authData) {
+const AddUser = async (authData) => {
     const hashPassword = await bcrypt.hash(Auth.password, 10);
     try {
         const added = new Auth({
             name: authData.name,
-            emai: authData.emai,
+            email: authData.email,
             password: authData.password
         })
         const saved = await Auth.create(added);
@@ -18,7 +18,7 @@ export async function AddUser(authData) {
     }
 }
 
-export async function UpdateUser (id, userData)  {
+const UpdateUser = async (id, userData) =>  {
     try {
         console.log("Updating User in Service:", id, userData);
 
@@ -43,6 +43,9 @@ export async function UpdateUser (id, userData)  {
     }
 }
 
-export async function deleteUser (id) {
+const deleteUser = async (id) => {
     return await Auth.findByIdAndDelete(id);
 }
+
+
+module.exports = {AddUser, UpdateUser, deleteUser};

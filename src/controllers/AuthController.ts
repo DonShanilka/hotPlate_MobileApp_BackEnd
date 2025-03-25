@@ -1,6 +1,6 @@
 const AuthService = require("../service/AuthService");
 
-export const  addAuth = async (req, res) => {
+const  addAuth = async (req, res) => {
     const authData = req.body;
     console.log("authData in AuthController: ", authData);
     try {
@@ -14,7 +14,7 @@ export const  addAuth = async (req, res) => {
     }
 }
 
-export const updateAuth = async (req, res) => {
+const updateAuth = async (req, res) => {
     try {
         const {id} = req.params;
         const authData = req.body;
@@ -30,3 +30,5 @@ export const updateAuth = async (req, res) => {
         res.status(500).json({error: "Failed to Update Auth"})
     }
 }
+
+module.exports = {addAuth, updateAuth}
