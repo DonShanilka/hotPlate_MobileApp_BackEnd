@@ -42,3 +42,7 @@ const UpdateUser = async (id, userData) => {
         throw new Error("Failed to Update User");
     }
 }
+
+const deleteUser = async (id) => {
+    return await Auth.findByIdAndDelete(id);
+}
