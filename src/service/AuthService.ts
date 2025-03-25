@@ -18,7 +18,7 @@ export async function AddUser(authData) {
     }
 }
 
-const UpdateUser = async (id, userData) => {
+export async function UpdateUser (id, userData)  {
     try {
         console.log("Updating User in Service:", id, userData);
 
@@ -43,6 +43,6 @@ const UpdateUser = async (id, userData) => {
     }
 }
 
-const deleteUser = async (id) => {
+export async function deleteUser (id) {
     return await Auth.findByIdAndDelete(id);
 }
