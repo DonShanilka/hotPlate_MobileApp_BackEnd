@@ -1,22 +1,22 @@
 import {AddUser, VerifyUser, UpdateUser, deleteUser} from "../service/AuthService";
 import {IUser} from "../model/AuthModel";
+import express from "express";
+const router = express.Router();
 
 
-export async function  addAuth (req : any, res : any){
-    const authData = req.body;
-    console.log("authData in AuthController: ", authData);
+router.post('/addUser', async (req, res) => {
+    const user = req.body;
+
     try {
-        const auth = await AddUser(authData);
-        console.log("auth ", auth);
-        res.status(200).json(auth);
-    } catch (error) {
-        res.status(400).json({
-            error: (error as Error).message
-        });
+        const userAdded = await AddUser(user);
+        res.status(201).json({ success: true, user: userAdded });
+    } catch (err) {
+        console.error("Error During User Adding:", err);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-}
+});
 
-export async function verifyUser(req : any, res :any) {
+router.post('/login', async (req,res) => {
     console.log("Login Info :",req.body);
     const email = req.body.email;
     const password = req.body.password;
@@ -33,21 +33,6 @@ export async function verifyUser(req : any, res :any) {
         console.log("Error Verify User");
         res.status(500).json({success:false,message:"Internal Server Error"});
     }
-}
+});
 
-export async function updateAuth (req : any, res : any){
-    try {
-        const {id} = req.params;
-        const authData = req.body;
-
-        const updateAuth = await UpdateUser(id, authData);
-
-        if (!updateAuth) {
-            return res.status(400).json({error: "Auth Not Found"});
-        }
-
-        res.status(200).json(updateAuth);
-    } catch (error) {
-        res.status(500).json({error: "Failed to Update Auth"})
-    }
-}
+module.exports = router;

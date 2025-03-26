@@ -1,26 +1,26 @@
 import mongoose from "mongoose";
-import Auth, {IUser} from "../model/AuthModel";
+import User, {IUser} from "../model/AuthModel";
 // @ts-ignore
 import bcrypt from 'bcrypt';
 
-export async function AddUser(authData : IUser) {
-    const hashPassword = await bcrypt.hash(authData.password, 10);
-    try {
-        const added = new Auth({
-            name: authData.name,
-            email: authData.email,
-            password: authData.password
+export async function AddUser(user : IUser) {
+    const hashPassword = await bcrypt.hash(user.password,10);
+    try{
+        const newUser = new User({
+            name:user.name,
+            email:user.email,
+            password:hashPassword
         })
-        const savedUser = await added.save();
-        console.log("User Saved :",savedUser);
-    } catch (error) {
-        console.log("Error Save Auth in AuthService:  ", error);
+        const saveUser =await newUser.save();
+        console.log("User Saved :",saveUser)
+    }catch (err){
+        console.log("Error During User :", err)
     }
 }
 
 export async function VerifyUser(user: Partial<IUser>) {
     try {
-        const existingUser: IUser | null = await Auth.findOne({ email: user.email });
+        const existingUser: IUser | null = await User.findOne({ email: user.email });
 
         if (!existingUser) {
             console.error("User not found");
@@ -53,7 +53,7 @@ export async function UpdateUser (id : any, userData : any)  {
             throw new Error("Invalid User ID");
         }
 
-        const updateUser = await Auth.findByIdAndUpdate(
+        const updateUser = await User.findByIdAndUpdate(
             id,
             {$set: userData},
             {new: true, runValidators: true}
@@ -71,6 +71,6 @@ export async function UpdateUser (id : any, userData : any)  {
 }
 
 export async function deleteUser(id:any) {
-    return await Auth.findByIdAndDelete(id);
+    return await User.findByIdAndDelete(id);
 }
 
