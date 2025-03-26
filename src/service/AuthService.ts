@@ -45,7 +45,7 @@ export async function VerifyUser(user: Partial<IUser>) {
     }
 }
 
-export async function UpdateUser (id, userData)  {
+export async function UpdateUser (id : any, userData : any)  {
     try {
         console.log("Updating User in Service:", id, userData);
 
@@ -70,7 +70,7 @@ export async function UpdateUser (id, userData)  {
     }
 }
 
-export async function deleteUser(id) {
+export async function deleteUser(id:any) {
     return await Auth.findByIdAndDelete(id);
 }
 
