@@ -16,3 +16,12 @@ export async function AddItem(item : Iitem) {
     console.log("Error Save Item", error);
   }
 }
+
+export async function getAllItems() {
+    try {
+        const items = await Item.find();
+        return items;
+    } catch (error) {
+        console.log("Error fetching items", error);
+    }
+}
