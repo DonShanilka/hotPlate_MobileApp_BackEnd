@@ -1,44 +1,44 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface Iitem extends Document {
-  itemName?: string;
-  catogory: string;
-  discription: string;
-  shopName: string;
-  price: number;
+    itemName: string; // itemName should be required
+    category: string; // Fixed spelling
+    description: string; // Fixed spelling
+    shopName: string;
+    price: number;
+    image: string; // If you're storing the image URL, use String instead of Buffer
 }
 
 const ItemSchema: Schema<Iitem> = new Schema(
-  {
-    itemName: {
-      type: String,
-      required: [true, "Please enter a name"],
-      trim: true,
+    {
+        itemName: {
+            type: String,
+            required: [true, "Please enter a name"],
+        },
+        category: {  // Fixed spelling here as well
+            type: String,
+            required: [true, "Please enter a category"], // Fixed spelling
+        },
+        description: {  // Fixed spelling here as well
+            type: String,
+            required: [true, "Please enter a description"], // Fixed spelling
+        },
+        shopName: {
+            type: String,
+            required: [true, "Please enter a shop name"],
+        },
+        price: {
+            type: Number,
+            required: [true, "Please enter a price"],
+        },
+        image: {
+            type: String, // Changed from Buffer to String (for image URL)
+            required: [true, "Please select an image"], // Fixed spelling
+        },
     },
-    catogory: {
-      type: String,
-      required: [true, "Please enter a catogory"],
-      trim: true,
-    },
-    discription: {
-      type: String,
-      required: [true, "Please enter a discription"],
-      trim: true,
-    },
-    shopName: {
-      type: String,
-      required: [true, "Please enter a shop name"],
-      trim: true,
-    },
-    price: {
-      type: Number,
-      required: [true, "Please enter a price"],
-      trim: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
+    {
+        timestamps: true,
+    }
 );
 
 const Item = mongoose.model<Iitem>("Item", ItemSchema);
