@@ -17,22 +17,23 @@ export async function AddOrder (req:any, res:any){
         res.status(201).json({ success: true, user: added });
     }catch (err){
         console.log("Error during order :",err);
+        return res.status(500).json({ success: false, message: "Error adding Order" });
     }
 }
 
-// router.get('/getAll', async (req, res) => {
-//     try {
-//         const orders = await getAllOrders();
-//         console.log(orders);
-//         res.status(200).json({
-//             success: true,
-//             orders: orders,
-//         });
-//     } catch (err) {
-//         console.log("Error during data fetching :", err);
-//         res.status(500).json({
-//             success: false,
-//             message: "Error fetching orders",
-//         });
-//     }
-// });
+export async function getAllOrder (req:any, res: any)  {
+    try {
+        const orders = await getAllOrders();
+        console.log(orders);
+        res.status(200).json({
+            success: true,
+            orders: orders,
+        });
+    } catch (err) {
+        console.log("Error during data fetching :", err);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching orders",
+        });
+    }
+}
