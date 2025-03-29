@@ -10,9 +10,9 @@ const cartItemSchema = new Schema({
 const orderSchema = new Schema(
     {
         address: { type: String, required: true },
-        phoneNumber: { type: String, required: true },
-        delivery: {type: String, required: true},
-        discount: {type: String, required: [0]},
+        phoneNumber: { type: Number, required: true },
+        delivery: {type: Number, required: true},
+        discount: {type: Number, required: [0]},
         totalPrice: { type: Number, required: true },
         items: { type: [cartItemSchema], required: true },
     },
