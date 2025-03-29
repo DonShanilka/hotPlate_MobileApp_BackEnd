@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 const userController = require("./src/controllers/AuthController");
 const itemRoutse = require('./src/routes/itemRoutse');
+const orderRoutse = require('./src/routes/orderRoutse');
 const cors = require('cors');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use(cors());
 
 app.use('/api/user',userController);
 app.use('/api',itemRoutse);
+app.use('/api',orderRoutse);
 
 app.listen(3000,()=>{
     console.log("Server running port 3000")
