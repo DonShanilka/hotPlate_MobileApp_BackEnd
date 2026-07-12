@@ -1,31 +1,10 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-export interface IRestaurant extends Document {
-  name: string;
-  description: string;
-  image: string;
-  phone: string;
-  email: string;
-  address: string;
-
-  cuisine: string[];
-
-  openingTime: string;
-  closingTime: string;
-
-  rating: number;
-
-  isActive: boolean;
-
-  owner: mongoose.Types.ObjectId;
-}
-
-const restaurantSchema = new Schema<IRestaurant>(
+const restaurantSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
-      trim: true,
     },
 
     description: {
@@ -33,9 +12,9 @@ const restaurantSchema = new Schema<IRestaurant>(
       required: true,
     },
 
-    image: {
+    address: {
       type: String,
-      default: "",
+      required: true,
     },
 
     phone: {
@@ -43,30 +22,18 @@ const restaurantSchema = new Schema<IRestaurant>(
       required: true,
     },
 
-    email: {
+    image: {
       type: String,
-      required: true,
-      unique: true,
     },
 
-    address: {
+    category: {
       type: String,
       required: true,
     },
 
-    cuisine: [
-      {
-        type: String,
-      },
-    ],
-
-    openingTime: {
-      type: String,
-      required: true,
-    },
-
-    closingTime: {
-      type: String,
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
 
@@ -79,16 +46,10 @@ const restaurantSchema = new Schema<IRestaurant>(
       type: Boolean,
       default: true,
     },
-
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
   },
   {
     timestamps: true,
   },
 );
 
-export default mongoose.model<IRestaurant>("Restaurant", restaurantSchema);
+export default mongoose.model("Restaurant", restaurantSchema);
