@@ -2,11 +2,22 @@ import Restaurant from "./restaurant.model";
 import { IRestaurant } from "./restaurant.interface";
 
 // Create Restaurant
-export async function createRestaurant(data: IRestaurant) {
+export async function createRestaurant(restaurantData: IRestaurant) {
   try {
-    const restaurant = await Restaurant.create(data);
+    const restaurant = await Restaurant.create({
+      name: restaurantData.name,
+      description: restaurantData.description,
+      address: restaurantData.address,
+      phone: restaurantData.phone,
+      category: restaurantData.category,
+      owner: restaurantData.owner,
+      image: restaurantData.image,
+      video: restaurantData.video,
+      rating: 0,
+      isActive: true,
+    });
 
-    console.log("Restaurant Created Successfully:", restaurant._id);
+    console.log("Restaurant Created Successfully:", restaurant);
 
     return restaurant;
   } catch (error) {

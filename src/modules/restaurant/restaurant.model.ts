@@ -1,55 +1,69 @@
 import mongoose, { Schema } from "mongoose";
 
+
 const restaurantSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true,
+{
+    name:{
+        type:String,
+        required:true
     },
 
-    description: {
-      type: String,
-      required: true,
+    description:{
+        type:String,
+        required:true
     },
 
-    address: {
-      type: String,
-      required: true,
+    address:{
+        type:String,
+        required:true
     },
 
-    phone: {
-      type: String,
-      required: true,
+    phone:{
+        type:String,
+        required:true
     },
 
-    image: {
-      type: String,
+    image:{
+        type:Buffer
     },
 
-    category: {
-      type: String,
-      required: true,
+
+    video:{
+        type:Buffer
     },
 
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+
+    category:{
+        type:String,
+        required:true
     },
 
-    rating: {
-      type: Number,
-      default: 0,
+
+    owner:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        required:true
     },
 
-    isActive: {
-      type: Boolean,
-      default: true,
+
+    rating:{
+        type:Number,
+        default:0
     },
-  },
-  {
-    timestamps: true,
-  },
+
+
+    isActive:{
+        type:Boolean,
+        default:true
+    }
+
+},
+{
+    timestamps:true
+});
+
+
+export default mongoose.model(
+    "Restaurant",
+    restaurantSchema
 );
-
-export default mongoose.model("Restaurant", restaurantSchema);

@@ -7,7 +7,8 @@ export interface IRestaurant extends Document {
     description: string;
     address: string;
     phone: string;
-    image?: string;
+    image?: Buffer;
+    video?: Buffer;
     category: string;
     owner: string;
     rating?: number;

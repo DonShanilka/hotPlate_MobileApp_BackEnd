@@ -1,18 +1,32 @@
 import { Request, Response } from "express";
 import * as restaurantService from "./restaurant.service";
+import { IRestaurant } from "../restaurant/restaurant.interface";
+import { extractImage } from "../../extractFiles/extractImages";
+import { extractVideo } from "../../extractFiles/extractVideo";
 
 // create
 export const createRestaurant = async (req: Request, res: Response) => {
   try {
-    const restaurant = await restaurantService.createRestaurant(req.body);
+    const restaurant: IRestaurant = {
+      ...req.body,
+      image: extractImage(req),
+      video: extractVideo(req),
+    };
 
-    res.status(201).json({
+    console.log("Request Body:", req.body);
+    console.log("Restaurant:", restaurant);
+
+    const newRestaurant = await restaurantService.createRestaurant(restaurant);
+
+    return res.status(201).json({
       success: true,
       message: "Restaurant created successfully",
-      data: restaurant,
+      data: newRestaurant,
     });
   } catch (error: any) {
-    res.status(500).json({
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
