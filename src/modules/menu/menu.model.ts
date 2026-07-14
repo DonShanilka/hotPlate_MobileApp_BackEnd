@@ -20,6 +20,11 @@ const menuSchema = new Schema(
       required: true,
     },
 
+    reting: {
+      type: Number,
+      required: true,
+    },
+
     image: Buffer,
 
     isAvailable: {

@@ -6,9 +6,10 @@ export interface IMenu {
   name: string;
   description: string;
   price: number;
+  rating: number;
   image?: Buffer;
   isAvailable?: boolean;
   preparationTime?: number;
   discount?: number;
-  
+
 }
