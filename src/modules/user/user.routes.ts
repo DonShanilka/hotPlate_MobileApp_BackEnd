@@ -1,5 +1,5 @@
 import express from "express";
-import { protect } from "../middleware/auth.middleware";
+import { protect } from "../../middleware/auth.middleware";
 
 import {
   register,
@@ -8,7 +8,7 @@ import {
   getSingleUser,
   update,
   remove,
-} from "../controllers/user.controller";
+} from "./user.controller";
 
 const router = express.Router();
 

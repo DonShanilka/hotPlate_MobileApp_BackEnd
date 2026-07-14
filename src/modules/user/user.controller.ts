@@ -7,7 +7,7 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-} from "../service/user.service";
+} from "./user.service";
 
 
 // create user

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 
-import userRoutes from "./src/routes/user.routes";
+import userRoutes from "./src/modules/user/user.routes";
 import restaurantRoutes from "./src/modules/restaurant/restaurant.routes";
 
 const itemRoutes = require("./src/routes/itemRoutse");
