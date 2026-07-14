@@ -95,3 +95,13 @@ export async function updateMenu(
     throw new Error("Failed to update menu");
   }
 }
+
+// get resturent menus
+export async function getRestaurantMenus(restaurantId: string) {
+  try {
+    return await Menu.find({ restaurantId });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to fetch restaurant menu");
+  }
+}

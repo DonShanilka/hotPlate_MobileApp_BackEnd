@@ -92,3 +92,24 @@ export const updateMenu = async (
     });
   }
 };
+
+export const getRestaurantMenus = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const menus = await menuService.getRestaurantMenus(
+      req.params.restaurantId as any
+    );
+
+    res.json({
+      success: true,
+      data: menus,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
