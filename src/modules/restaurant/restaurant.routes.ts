@@ -12,8 +12,8 @@ const router = Router();
 
 router.post("/create", createRestaurant);
 router.get("/getAll", getRestaurants);
-router.get("getById/:id", getRestaurant);
-router.put("update/:id", updateRestaurant);
-router.delete("delete/:id", deleteRestaurant);
+router.get("/getById/:id", getRestaurant);
+router.put("/update/:id", updateRestaurant);
+router.delete("/delete/:id", deleteRestaurant);
 
 export default router;

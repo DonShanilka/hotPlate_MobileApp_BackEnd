@@ -73,18 +73,34 @@ export const getRestaurant = async (req: Request, res: Response) => {
 // update
 export const updateRestaurant = async (req: Request, res: Response) => {
   try {
-    const restaurant = await restaurantService.updateRestaurant(
+    const restaurant: Partial<IRestaurant> = {
+      ...req.body,
+    };
+
+    // Update image only if a new image is uploaded
+    if (req.files?.image) {
+      restaurant.image = extractImage(req);
+    }
+
+    // Update video only if a new video is uploaded
+    if (req.files?.video) {
+      restaurant.video = extractVideo(req);
+    }
+
+    const updatedRestaurant = await restaurantService.updateRestaurant(
       req.params.id as any,
-      req.body,
+      restaurant,
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Restaurant updated successfully",
-      data: restaurant,
+      data: updatedRestaurant,
     });
   } catch (error: any) {
-    res.status(500).json({
+    console.error("Update Restaurant Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
