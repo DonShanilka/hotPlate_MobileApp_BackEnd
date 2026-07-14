@@ -60,7 +60,10 @@ export async function getRestaurantById(id: string) {
 }
 
 // Update Restaurant
-export async function updateRestaurant(id: string, data: Partial<IRestaurant>) {
+export async function updateRestaurant(
+  id: string,
+  restaurantData: Partial<IRestaurant>,
+) {
   try {
     const existingRestaurant = await Restaurant.findById(id);
 
@@ -68,12 +71,49 @@ export async function updateRestaurant(id: string, data: Partial<IRestaurant>) {
       throw new Error("Restaurant not found");
     }
 
-    const updatedRestaurant = await Restaurant.findByIdAndUpdate(id, data, {
-      new: true,
-      runValidators: true,
-    });
+    const updateData: any = {};
 
-    console.log("Restaurant Updated Successfully:", updatedRestaurant?._id);
+    // Only include fields that were sent
+    if (restaurantData.name !== undefined)
+      updateData.name = restaurantData.name;
+
+    if (restaurantData.description !== undefined)
+      updateData.description = restaurantData.description;
+
+    if (restaurantData.address !== undefined)
+      updateData.address = restaurantData.address;
+
+    if (restaurantData.phone !== undefined)
+      updateData.phone = restaurantData.phone;
+
+    if (restaurantData.category !== undefined)
+      updateData.category = restaurantData.category;
+
+    if (restaurantData.owner !== undefined)
+      updateData.owner = restaurantData.owner;
+
+    if (restaurantData.image !== undefined)
+      updateData.image = restaurantData.image;
+
+    if (restaurantData.video !== undefined)
+      updateData.video = restaurantData.video;
+
+    if (restaurantData.rating !== undefined)
+      updateData.rating = restaurantData.rating;
+
+    if (restaurantData.isActive !== undefined)
+      updateData.isActive = restaurantData.isActive;
+
+    const updatedRestaurant = await Restaurant.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    console.log("Restaurant Updated Successfully");
 
     return updatedRestaurant;
   } catch (error) {
