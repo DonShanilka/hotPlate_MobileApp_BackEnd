@@ -15,3 +15,33 @@ export async function createMenu(menuData: IMenu) {
   }
 }
 
+// Get All Menus
+export async function getMenus() {
+  try {
+    return await Menu.find()
+      .populate("restaurantId", "name address phone")
+      .sort({ createdAt: -1 });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to fetch menus");
+  }
+}
+
+// Get Menu By ID
+export async function getMenuById(id: string) {
+  try {
+    const menu = await Menu.findById(id).populate(
+      "restaurantId",
+      "name address phone",
+    );
+
+    if (!menu) {
+      throw new Error("Menu not found");
+    }
+
+    return menu;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to fetch menu");
+  }
+}

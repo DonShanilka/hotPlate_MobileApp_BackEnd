@@ -5,9 +5,10 @@ import fileUpload from "express-fileupload";
 
 import userRoutes from "./src/modules/user/user.routes";
 import restaurantRoutes from "./src/modules/restaurant/restaurant.routes";
+import menuRoutes from "./src/modules/menu/menu.routes"
 
-const itemRoutes = require("./src/routes/itemRoutse");
-const orderRoutes = require("./src/routes/orderRoutse");
+// const itemRoutes = require("./src/routes/itemRoutse");
+// const orderRoutes = require("./src/routes/orderRoutse");
 
 const app = express();
 
@@ -53,10 +54,11 @@ mongoose
   .catch((err) => console.log("MongoDB Connection Error:", err));
 
 // Routes
-app.use("/api", itemRoutes);
-app.use("/api", orderRoutes);
+// app.use("/api", itemRoutes);
+// app.use("/api", orderRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/resturent", restaurantRoutes);
+app.use("/api/menu", menuRoutes);
 
 // Start Server
 app.listen(3000, () => {

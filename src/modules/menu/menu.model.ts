@@ -20,7 +20,7 @@ const menuSchema = new Schema(
       required: true,
     },
 
-    reting: {
+    rating: {
       type: Number,
       required: true,
     },
