@@ -45,3 +45,53 @@ export async function getMenuById(id: string) {
     throw new Error("Failed to fetch menu");
   }
 }
+
+// Update Menu
+export async function updateMenu(
+  id: string,
+  menuData: Partial<IMenu>
+) {
+  try {
+    const existingMenu = await Menu.findById(id);
+
+    if (!existingMenu) {
+      throw new Error("Menu not found");
+    }
+
+    const updateData: Partial<IMenu> = {};
+
+    if (menuData.name !== undefined)
+      updateData.name = menuData.name;
+
+    if (menuData.description !== undefined)
+      updateData.description = menuData.description;
+
+    if (menuData.price !== undefined)
+      updateData.price = menuData.price;
+
+    if (menuData.image !== undefined)
+      updateData.image = menuData.image;
+
+    if (menuData.restaurantId !== undefined)
+      updateData.restaurantId = menuData.restaurantId;
+
+    if (menuData.isAvailable !== undefined)
+      updateData.isAvailable = menuData.isAvailable;
+
+    const updatedMenu = await Menu.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    console.log("Menu Updated Successfully");
+
+    return updatedMenu;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to update menu");
+  }
+}
