@@ -61,11 +61,7 @@ export const getMenu = async (req: Request, res: Response) => {
   }
 };
 
-
-export const updateMenu = async (
-  req: Request,
-  res: Response
-) => {
+export const updateMenu = async (req: Request, res: Response) => {
   try {
     const menu: Partial<IMenu> = {
       ...req.body,
@@ -75,10 +71,7 @@ export const updateMenu = async (
       menu.image = (req.files.image as UploadedFile).data;
     }
 
-    const result = await menuService.updateMenu(
-      req.params.id as any,
-      menu
-    );
+    const result = await menuService.updateMenu(req.params.id as any, menu);
 
     res.json({
       success: true,
@@ -93,18 +86,31 @@ export const updateMenu = async (
   }
 };
 
-export const getRestaurantMenus = async (
-  req: Request,
-  res: Response
-) => {
+export const getRestaurantMenus = async (req: Request, res: Response) => {
   try {
     const menus = await menuService.getRestaurantMenus(
-      req.params.restaurantId as any
+      req.params.restaurantId as any,
     );
 
     res.json({
       success: true,
       data: menus,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const deleteMenu = async (req: Request, res: Response) => {
+  try {
+    await menuService.deleteMenu(req.params.id as any);
+
+    res.json({
+      success: true,
+      message: "Menu deleted successfully",
     });
   } catch (error: any) {
     res.status(500).json({

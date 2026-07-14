@@ -47,10 +47,7 @@ export async function getMenuById(id: string) {
 }
 
 // Update Menu
-export async function updateMenu(
-  id: string,
-  menuData: Partial<IMenu>
-) {
+export async function updateMenu(id: string, menuData: Partial<IMenu>) {
   try {
     const existingMenu = await Menu.findById(id);
 
@@ -60,17 +57,14 @@ export async function updateMenu(
 
     const updateData: Partial<IMenu> = {};
 
-    if (menuData.name !== undefined)
-      updateData.name = menuData.name;
+    if (menuData.name !== undefined) updateData.name = menuData.name;
 
     if (menuData.description !== undefined)
       updateData.description = menuData.description;
 
-    if (menuData.price !== undefined)
-      updateData.price = menuData.price;
+    if (menuData.price !== undefined) updateData.price = menuData.price;
 
-    if (menuData.image !== undefined)
-      updateData.image = menuData.image;
+    if (menuData.image !== undefined) updateData.image = menuData.image;
 
     if (menuData.restaurantId !== undefined)
       updateData.restaurantId = menuData.restaurantId;
@@ -84,7 +78,7 @@ export async function updateMenu(
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     console.log("Menu Updated Successfully");
@@ -103,5 +97,23 @@ export async function getRestaurantMenus(restaurantId: string) {
   } catch (error) {
     console.error(error);
     throw new Error("Failed to fetch restaurant menu");
+  }
+}
+
+// Delete Menu
+export async function deleteMenu(id: string) {
+  try {
+    const existingMenu = await Menu.findById(id);
+
+    if (!existingMenu) {
+      throw new Error("Menu not found");
+    }
+
+    await Menu.findByIdAndDelete(id);
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to delete menu");
   }
 }
