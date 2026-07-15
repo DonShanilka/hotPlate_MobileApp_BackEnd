@@ -7,6 +7,7 @@ import userRoutes from "./src/modules/user/user.routes";
 import restaurantRoutes from "./src/modules/restaurant/restaurant.routes";
 import menuRoutes from "./src/modules/menu/menu.routes"
 import driverRoutes from "./src/modules/driver/driver.routes";
+import orderRoutes from "./src/modules/order/order.routes";
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/resturent", restaurantRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/driver", driverRoutes);
+app.use("/api/order", orderRoutes);
 
 // Start Server
 app.listen(3000, () => {
