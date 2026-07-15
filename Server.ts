@@ -8,9 +8,6 @@ import restaurantRoutes from "./src/modules/restaurant/restaurant.routes";
 import menuRoutes from "./src/modules/menu/menu.routes"
 import driverRoutes from "./src/modules/driver/driver.routes";
 
-// const itemRoutes = require("./src/routes/itemRoutse");
-// const orderRoutes = require("./src/routes/orderRoutse");
-
 const app = express();
 
 const mongoUrl = "mongodb://localhost:27017/HotPlate";
