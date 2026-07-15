@@ -6,9 +6,9 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone: string;
-  role: string;
+  role: "CUSTOMER" | "DRIVER" | "RESTAURANT" | "ADMIN";
   profile_image: string;
-  status: string;
+  status: "ACTIVE" | "INACTIVE" | "BLOCKED";
 }
 
 const UserSchema = new Schema<IUser>(
@@ -39,6 +39,7 @@ const UserSchema = new Schema<IUser>(
 
     role: {
       type: String,
+      enum: ["CUSTOMER", "DRIVER", "RESTAURANT", "ADMIN"],
       default: "CUSTOMER",
     },
 
@@ -48,6 +49,7 @@ const UserSchema = new Schema<IUser>(
 
     status: {
       type: String,
+      enum: ["ACTIVE", "INACTIVE", "BLOCKED"],
       default: "ACTIVE",
     },
   },
@@ -57,3 +59,4 @@ const UserSchema = new Schema<IUser>(
 );
 
 export default mongoose.model<IUser>("User", UserSchema);
+

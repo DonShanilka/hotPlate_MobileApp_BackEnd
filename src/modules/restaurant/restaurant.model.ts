@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { IRestaurant } from "./restaurant.interface";
 
 const restaurantSchema = new Schema(
   {
@@ -18,6 +19,26 @@ const restaurantSchema = new Schema(
     },
 
     phone: {
+      type: String,
+      required: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+    },
+
+    cuisine: {
+      type: [String],
+      required: true,
+    },
+
+    openingTime: {
+      type: String,
+      required: true,
+    },
+
+    closingTime: {
       type: String,
       required: true,
     },
@@ -56,4 +77,4 @@ const restaurantSchema = new Schema(
   },
 );
 
-export default mongoose.model("Restaurant", restaurantSchema);
+export default mongoose.model<IRestaurant>("Restaurant", restaurantSchema);

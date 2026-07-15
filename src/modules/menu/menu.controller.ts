@@ -3,9 +3,24 @@ import { UploadedFile } from "express-fileupload";
 
 import * as menuService from "./menu.service";
 import { IMenu } from "./menu.interface";
+import { menuSchema, updateMenuSchema } from "./menu.validation";
 
 export const createMenu = async (req: Request, res: Response) => {
   try {
+    // Typecast numeric inputs sent as string in multipart form-data
+    if (req.body.price !== undefined) req.body.price = Number(req.body.price);
+    if (req.body.rating !== undefined) req.body.rating = Number(req.body.rating);
+    if (req.body.preparationTime !== undefined) req.body.preparationTime = Number(req.body.preparationTime);
+    if (req.body.discount !== undefined) req.body.discount = Number(req.body.discount);
+
+    const { error } = menuSchema.validate(req.body, { allowUnknown: true });
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
     const menu: IMenu = {
       ...req.body,
     };
@@ -63,6 +78,20 @@ export const getMenu = async (req: Request, res: Response) => {
 
 export const updateMenu = async (req: Request, res: Response) => {
   try {
+    // Typecast numeric inputs sent as string in multipart form-data
+    if (req.body.price !== undefined) req.body.price = Number(req.body.price);
+    if (req.body.rating !== undefined) req.body.rating = Number(req.body.rating);
+    if (req.body.preparationTime !== undefined) req.body.preparationTime = Number(req.body.preparationTime);
+    if (req.body.discount !== undefined) req.body.discount = Number(req.body.discount);
+
+    const { error } = updateMenuSchema.validate(req.body, { allowUnknown: true });
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
     const menu: Partial<IMenu> = {
       ...req.body,
     };

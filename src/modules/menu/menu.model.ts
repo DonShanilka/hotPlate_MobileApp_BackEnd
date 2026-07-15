@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { IMenu } from "./menu.interface";
 
 const menuSchema = new Schema(
   {
@@ -22,7 +23,7 @@ const menuSchema = new Schema(
 
     rating: {
       type: Number,
-      required: true,
+      default: 0,
     },
 
     image: Buffer,
@@ -31,10 +32,19 @@ const menuSchema = new Schema(
       type: Boolean,
       default: true,
     },
+
+    preparationTime: {
+      type: Number,
+    },
+
+    discount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-export default mongoose.model("Menu", menuSchema);
+export default mongoose.model<IMenu>("Menu", menuSchema);

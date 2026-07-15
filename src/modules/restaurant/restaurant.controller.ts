@@ -3,10 +3,28 @@ import * as restaurantService from "./restaurant.service";
 import { IRestaurant } from "../restaurant/restaurant.interface";
 import { extractImage } from "../../extractFiles/extractImages";
 import { extractVideo } from "../../extractFiles/extractVideo";
+import { restaurantSchema, updateRestaurantSchema } from "./restaurant.validation";
 
 // create
 export const createRestaurant = async (req: Request, res: Response) => {
   try {
+    // Parse cuisine if sent as string (JSON or comma separated)
+    if (req.body.cuisine && typeof req.body.cuisine === "string") {
+      try {
+        req.body.cuisine = JSON.parse(req.body.cuisine);
+      } catch {
+        req.body.cuisine = req.body.cuisine.split(",").map((s: string) => s.trim());
+      }
+    }
+
+    const { error } = restaurantSchema.validate(req.body, { allowUnknown: true });
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
     const restaurant: IRestaurant = {
       ...req.body,
       image: extractImage(req),
@@ -73,6 +91,23 @@ export const getRestaurant = async (req: Request, res: Response) => {
 // update
 export const updateRestaurant = async (req: Request, res: Response) => {
   try {
+    // Parse cuisine if sent as string (JSON or comma separated)
+    if (req.body.cuisine && typeof req.body.cuisine === "string") {
+      try {
+        req.body.cuisine = JSON.parse(req.body.cuisine);
+      } catch {
+        req.body.cuisine = req.body.cuisine.split(",").map((s: string) => s.trim());
+      }
+    }
+
+    const { error } = updateRestaurantSchema.validate(req.body, { allowUnknown: true });
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
     const restaurant: Partial<IRestaurant> = {
       ...req.body,
     };

@@ -9,6 +9,10 @@ export async function createRestaurant(restaurantData: IRestaurant) {
       description: restaurantData.description,
       address: restaurantData.address,
       phone: restaurantData.phone,
+      email: restaurantData.email,
+      cuisine: restaurantData.cuisine,
+      openingTime: restaurantData.openingTime,
+      closingTime: restaurantData.closingTime,
       category: restaurantData.category,
       owner: restaurantData.owner,
       image: restaurantData.image,
@@ -85,6 +89,18 @@ export async function updateRestaurant(
 
     if (restaurantData.phone !== undefined)
       updateData.phone = restaurantData.phone;
+
+    if (restaurantData.email !== undefined)
+      updateData.email = restaurantData.email;
+
+    if (restaurantData.cuisine !== undefined)
+      updateData.cuisine = restaurantData.cuisine;
+
+    if (restaurantData.openingTime !== undefined)
+      updateData.openingTime = restaurantData.openingTime;
+
+    if (restaurantData.closingTime !== undefined)
+      updateData.closingTime = restaurantData.closingTime;
 
     if (restaurantData.category !== undefined)
       updateData.category = restaurantData.category;

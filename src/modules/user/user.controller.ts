@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { registerSchema, loginSchema } from "./user.validation";
 
 import {
   registerUser,
@@ -13,6 +14,14 @@ import {
 // create user
 export const register = async (req: Request, res: Response) => {
   try {
+    const { error } = registerSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
     const result = await registerUser(req.body);
 
     res.status(201).json({
@@ -31,6 +40,14 @@ export const register = async (req: Request, res: Response) => {
 // login
 export const login = async (req: Request, res: Response) => {
   try {
+    const { error } = loginSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
     const result = await loginUser(
       req.body.email,
       req.body.password,

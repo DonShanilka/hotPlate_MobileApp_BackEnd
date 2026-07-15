@@ -72,6 +72,12 @@ export async function updateMenu(id: string, menuData: Partial<IMenu>) {
     if (menuData.isAvailable !== undefined)
       updateData.isAvailable = menuData.isAvailable;
 
+    if (menuData.preparationTime !== undefined)
+      updateData.preparationTime = menuData.preparationTime;
+
+    if (menuData.discount !== undefined)
+      updateData.discount = menuData.discount;
+
     const updatedMenu = await Menu.findByIdAndUpdate(
       id,
       { $set: updateData },
