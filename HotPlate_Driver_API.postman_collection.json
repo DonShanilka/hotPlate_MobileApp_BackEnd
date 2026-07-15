@@ -1,0 +1,303 @@
+{
+  "info": {
+    "name": "HotPlate Driver API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. User Registration",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"password\": \"Password123\",\n  \"phone\": \"9876543210\",\n  \"role\": \"CUSTOMER\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/users/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "users",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. User Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "if (response.success && response.data.token) {",
+              "    pm.globals.set(\"driver_token\", response.data.token);",
+              "    console.log(\"Saved driver_token to global variables\");",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"jane.smith@example.com\",\n  \"password\": \"Password123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/users/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "users",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Register Driver Profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driver_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleType\": \"BIKE\",\n  \"vehicleNumber\": \"BIKE-9999\",\n  \"licenseNumber\": \"DL-9999\",\n  \"phone\": \"9876543210\",\n  \"address\": \"456 Express Road, Tech City\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/driver/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Get Logged-in Driver Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driver_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/driver/profile",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            "profile"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Get All Drivers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/driver/getAll",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            "getAll"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Get Driver by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/driver/getById/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            "getById",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "DRIVER_PROFILE_ID_HERE"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Update Driver Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driver_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"address\": \"789 New St, Tech City\",\n  \"vehicleType\": \"CAR\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/driver/update/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            "update",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "DRIVER_PROFILE_ID_HERE"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Toggle Driver Availability",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driver_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isAvailable\": false\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/driver/:id/availability",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            ":id",
+            "availability"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "DRIVER_PROFILE_ID_HERE"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. Delete Driver Profile",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driver_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/driver/delete/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "driver",
+            "delete",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "DRIVER_PROFILE_ID_HERE"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

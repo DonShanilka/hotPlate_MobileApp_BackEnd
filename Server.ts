@@ -6,6 +6,7 @@ import fileUpload from "express-fileupload";
 import userRoutes from "./src/modules/user/user.routes";
 import restaurantRoutes from "./src/modules/restaurant/restaurant.routes";
 import menuRoutes from "./src/modules/menu/menu.routes"
+import driverRoutes from "./src/modules/driver/driver.routes";
 
 // const itemRoutes = require("./src/routes/itemRoutse");
 // const orderRoutes = require("./src/routes/orderRoutse");
@@ -59,6 +60,7 @@ mongoose
 app.use("/api/users", userRoutes);
 app.use("/api/resturent", restaurantRoutes);
 app.use("/api/menu", menuRoutes);
+app.use("/api/driver", driverRoutes);
 
 // Start Server
 app.listen(3000, () => {
