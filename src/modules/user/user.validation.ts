@@ -25,6 +25,7 @@ export const registerSchema = Joi.object({
     .messages({
       "any.only": "Role must be CUSTOMER, DRIVER, RESTAURANT, or ADMIN",
     }),
+  address: Joi.string().optional(),
 });
 
 export const loginSchema = Joi.object({
