@@ -1,14 +1,14 @@
 import Driver from "./driver.model";
-import User from "../user/User";
+// import User from "../user/User";
 import { IDriver } from "./driver.interface";
 
 // Create Driver Profile
 export async function createDriver(driverData: IDriver) {
   try {
-    // Verify User exists
-    const user = await User.findById(driverData.userId);
-    if (!user) {
-      throw new Error("User not found");
+    // Verify Driver exists
+    const driver = await Driver.findById(driverData.userId);
+    if (!driver) {
+      throw new Error("Driver not found");
     }
 
     // Check if driver profile already exists for this user
@@ -18,13 +18,17 @@ export async function createDriver(driverData: IDriver) {
     }
 
     // Verify unique vehicleNumber
-    const existingVehicle = await Driver.findOne({ vehicleNumber: driverData.vehicleNumber });
+    const existingVehicle = await Driver.findOne({
+      vehicleNumber: driverData.vehicleNumber,
+    });
     if (existingVehicle) {
       throw new Error("Vehicle number is already registered");
     }
 
     // Verify unique licenseNumber
-    const existingLicense = await Driver.findOne({ licenseNumber: driverData.licenseNumber });
+    const existingLicense = await Driver.findOne({
+      licenseNumber: driverData.licenseNumber,
+    });
     if (existingLicense) {
       throw new Error("License number is already registered");
     }
@@ -38,23 +42,27 @@ export async function createDriver(driverData: IDriver) {
       phone: driverData.phone,
       address: driverData.address,
       profileImage: driverData.profileImage,
-      isAvailable: driverData.isAvailable !== undefined ? driverData.isAvailable : true,
+      isAvailable:
+        driverData.isAvailable !== undefined ? driverData.isAvailable : true,
       isActive: driverData.isActive !== undefined ? driverData.isActive : true,
       rating: 0,
       totalDeliveries: 0,
     });
 
-    // Automatically update User role to DRIVER
-    if (user.role !== "DRIVER") {
-      user.role = "DRIVER";
-      await user.save();
-      console.log(`Updated user ${user._id} role to DRIVER`);
-    }
+    // Automatically update Driver role to DRIVER
+    // if (driver. !== "DRIVER") {
+    //   driver.role = "DRIVER";
+    //   await driver.save();
+    //   console.log(`Updated driver ${driver._id} role to DRIVER`);
+    // }
 
     console.log("Driver Profile Created Successfully:", newDriver);
 
     // Populate user details before returning
-    return await newDriver.populate("userId", "first_name last_name email phone role profile_image status");
+    return await newDriver.populate(
+      "userId",
+      "first_name last_name email phone role profile_image status",
+    );
   } catch (error: any) {
     console.error("Error Creating Driver:", error);
     throw new Error(error.message || "Failed to create driver profile");
@@ -81,7 +89,10 @@ export async function getAllDrivers(filters: {
     }
 
     const drivers = await Driver.find(query)
-      .populate("userId", "first_name last_name email phone role profile_image status")
+      .populate(
+        "userId",
+        "first_name last_name email phone role profile_image status",
+      )
       .sort({ createdAt: -1 });
 
     return drivers;
@@ -96,7 +107,7 @@ export async function getDriverById(id: string) {
   try {
     const driver = await Driver.findById(id).populate(
       "userId",
-      "first_name last_name email phone role profile_image status"
+      "first_name last_name email phone role profile_image status",
     );
 
     if (!driver) {
@@ -115,7 +126,7 @@ export async function getDriverByUserId(userId: string) {
   try {
     const driver = await Driver.findOne({ userId }).populate(
       "userId",
-      "first_name last_name email phone role profile_image status"
+      "first_name last_name email phone role profile_image status",
     );
 
     if (!driver) {
@@ -138,36 +149,61 @@ export async function updateDriver(id: string, driverData: Partial<IDriver>) {
     }
 
     // If updating unique fields, verify they aren't taken
-    if (driverData.vehicleNumber && driverData.vehicleNumber !== existingDriver.vehicleNumber) {
-      const duplicateVehicle = await Driver.findOne({ vehicleNumber: driverData.vehicleNumber });
+    if (
+      driverData.vehicleNumber &&
+      driverData.vehicleNumber !== existingDriver.vehicleNumber
+    ) {
+      const duplicateVehicle = await Driver.findOne({
+        vehicleNumber: driverData.vehicleNumber,
+      });
       if (duplicateVehicle) {
-        throw new Error("Vehicle number is already registered to another driver");
+        throw new Error(
+          "Vehicle number is already registered to another driver",
+        );
       }
     }
 
-    if (driverData.licenseNumber && driverData.licenseNumber !== existingDriver.licenseNumber) {
-      const duplicateLicense = await Driver.findOne({ licenseNumber: driverData.licenseNumber });
+    if (
+      driverData.licenseNumber &&
+      driverData.licenseNumber !== existingDriver.licenseNumber
+    ) {
+      const duplicateLicense = await Driver.findOne({
+        licenseNumber: driverData.licenseNumber,
+      });
       if (duplicateLicense) {
-        throw new Error("License number is already registered to another driver");
+        throw new Error(
+          "License number is already registered to another driver",
+        );
       }
     }
 
     const updateFields: any = {};
-    if (driverData.vehicleType !== undefined) updateFields.vehicleType = driverData.vehicleType;
-    if (driverData.vehicleNumber !== undefined) updateFields.vehicleNumber = driverData.vehicleNumber;
-    if (driverData.licenseNumber !== undefined) updateFields.licenseNumber = driverData.licenseNumber;
+    if (driverData.vehicleType !== undefined)
+      updateFields.vehicleType = driverData.vehicleType;
+    if (driverData.vehicleNumber !== undefined)
+      updateFields.vehicleNumber = driverData.vehicleNumber;
+    if (driverData.licenseNumber !== undefined)
+      updateFields.licenseNumber = driverData.licenseNumber;
     if (driverData.phone !== undefined) updateFields.phone = driverData.phone;
-    if (driverData.address !== undefined) updateFields.address = driverData.address;
-    if (driverData.profileImage !== undefined) updateFields.profileImage = driverData.profileImage;
-    if (driverData.isAvailable !== undefined) updateFields.isAvailable = driverData.isAvailable;
-    if (driverData.isActive !== undefined) updateFields.isActive = driverData.isActive;
-    if (driverData.rating !== undefined) updateFields.rating = driverData.rating;
+    if (driverData.address !== undefined)
+      updateFields.address = driverData.address;
+    if (driverData.profileImage !== undefined)
+      updateFields.profileImage = driverData.profileImage;
+    if (driverData.isAvailable !== undefined)
+      updateFields.isAvailable = driverData.isAvailable;
+    if (driverData.isActive !== undefined)
+      updateFields.isActive = driverData.isActive;
+    if (driverData.rating !== undefined)
+      updateFields.rating = driverData.rating;
 
     const updatedDriver = await Driver.findByIdAndUpdate(
       id,
       { $set: updateFields },
-      { new: true, runValidators: true }
-    ).populate("userId", "first_name last_name email phone role profile_image status");
+      { new: true, runValidators: true },
+    ).populate(
+      "userId",
+      "first_name last_name email phone role profile_image status",
+    );
 
     console.log("Driver Updated Successfully");
     return updatedDriver;
@@ -187,13 +223,13 @@ export async function deleteDriver(id: string) {
 
     await Driver.findByIdAndDelete(id);
 
-    // Option: Demote user role back to CUSTOMER
-    const user = await User.findById(existingDriver.userId);
-    if (user && user.role === "DRIVER") {
-      user.role = "CUSTOMER";
-      await user.save();
-      console.log(`Reverted user ${user._id} role back to CUSTOMER`);
-    }
+    // Option: Demote driver role back to CUSTOMER
+    // const driver = await Driver.findById(existingDriver.userId);
+    // if (driver && driver.role === "DRIVER") {
+    //   driver.role = "CUSTOMER";
+    //   await driver.save();
+    //   console.log(`Reverted driver ${driver._id} role back to CUSTOMER`);
+    // }
 
     console.log("Driver Deleted Successfully:", id);
     return {

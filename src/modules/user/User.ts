@@ -2,12 +2,13 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IUser extends Document {
   first_name: string;
-  last_name: string;
+  last_name?: string;
   email: string;
   password: string;
-  phone: string;
-  role: "CUSTOMER" | "DRIVER" | "RESTAURANT" | "ADMIN";
-  profile_image: string;
+  phone?: string;
+  role: "CUSTOMER";
+  profile_image?: string;
+  address?: string;
   status: "ACTIVE" | "INACTIVE" | "BLOCKED";
 }
 
@@ -16,16 +17,20 @@ const UserSchema = new Schema<IUser>(
     first_name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     last_name: {
       type: String,
+      trim: true,
     },
 
     email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
 
     password: {
@@ -35,16 +40,22 @@ const UserSchema = new Schema<IUser>(
 
     phone: {
       type: String,
+      trim: true,
     },
 
     role: {
       type: String,
-      enum: ["CUSTOMER", "DRIVER", "RESTAURANT", "ADMIN"],
+      enum: ["CUSTOMER"],
       default: "CUSTOMER",
     },
 
     profile_image: {
       type: String,
+    },
+
+    address: {
+      type: String,
+      trim: true,
     },
 
     status: {
@@ -58,5 +69,25 @@ const UserSchema = new Schema<IUser>(
   },
 );
 
-export default mongoose.model<IUser>("User", UserSchema);
+UserSchema.pre("save", function (next) {
+  this.role = "CUSTOMER";
+  next();
+});
 
+UserSchema.pre(["findOneAndUpdate", "updateOne", "updateMany"], function (next) {
+  const update = this.getUpdate() as Record<string, any>;
+
+  if (!update) {
+    return next();
+  }
+
+  if (update.$set) {
+    update.$set.role = "CUSTOMER";
+  } else {
+    update.role = "CUSTOMER";
+  }
+
+  next();
+});
+
+export default mongoose.model<IUser>("User", UserSchema);
