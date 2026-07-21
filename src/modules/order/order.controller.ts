@@ -15,6 +15,7 @@ import {
   updatePaymentStatus,
   cancelOrder,
   deleteOrder,
+  getAllPendingOrdersByUserId,
 } from "./order.service";
 
 // add prder
@@ -271,3 +272,20 @@ export async function deleteOrderHandler(req: Request, res: Response) {
     });
   }
 }
+
+// get pending order by user id
+export const getPendingOrdersByUser = async (req: Request, res: Response) => {
+  try {
+    const orders = await getAllPendingOrdersByUserId(req.params.userId as any);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

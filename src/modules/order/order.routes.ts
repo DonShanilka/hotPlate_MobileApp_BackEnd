@@ -10,6 +10,7 @@ import {
   updatePayment,
   cancelOrderHandler,
   deleteOrderHandler,
+  getPendingOrdersByUser,
 } from "./order.controller";
 
 const router = Router();
@@ -47,5 +48,7 @@ router.patch("/payment/:id", protect, updatePayment);
 
 // DELETE /api/order/delete/:id    → hard delete (admin only)
 router.delete("/delete/:id", protect, deleteOrderHandler);
+
+router.get("/pending/:userId", getPendingOrdersByUser);
 
 export default router;

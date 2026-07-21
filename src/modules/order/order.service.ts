@@ -225,3 +225,19 @@ export async function deleteOrder(orderId: string) {
     throw new Error(error.message || "Failed to delete order");
   }
 }
+
+// get pending order by user ID
+export async function getAllPendingOrdersByUserId(userId: string) {
+  try {
+    const orders = await Order.find({
+      userId,
+      status: "PENDING",
+    })
+      .sort({ createdAt: -1 })
+      .populate("userId", "first_name last_name email phone address");
+
+    return orders;
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to get pending orders");
+  }
+}
