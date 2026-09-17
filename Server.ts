@@ -2,16 +2,39 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import fileUpload from "express-fileupload";
+import http from "http";
+import { Server } from "socket.io";
 
 import userRoutes from "./src/modules/user/user.routes";
 import restaurantRoutes from "./src/modules/restaurant/restaurant.routes";
 import menuRoutes from "./src/modules/menu/menu.routes"
 import driverRoutes from "./src/modules/driver/driver.routes";
 import orderRoutes from "./src/modules/order/order.routes";
+import trackingRoutes from "./src/modules/tracking/tracking.routes";
+import { registerTrackingSocket } from "./src/modules/tracking/tracking.socket";
 
 const app = express();
 
 const mongoUrl = "mongodb://localhost:27017/HotPlate";
+
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*", // Development only
+    methods: ["GET", "POST", "PATCH"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  registerTrackingSocket(io, socket);
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
 
 // CORS Headers
 app.use((req, res, next) => {
@@ -60,6 +83,7 @@ app.use("/api/resturent", restaurantRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/tracking",trackingRoutes);
 
 // Start Server
 app.listen(3000, () => {

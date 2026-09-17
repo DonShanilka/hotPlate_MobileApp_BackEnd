@@ -1,94 +1,90 @@
 import Joi from "joi";
+import {
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "./order.interface";
 
-// Validate a single item inside the items array
+const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+
+const objectIdSchema = Joi.string().pattern(objectIdPattern);
+
 const orderItemSchema = Joi.object({
-  name: Joi.string().required().messages({
-    "string.empty": "Item name is required",
-    "any.required": "Item name is required",
-  }),
-  size: Joi.string().optional(),
-  quantity: Joi.number().integer().min(1).required().messages({
-    "number.base": "Item quantity must be a number",
-    "number.min": "Item quantity must be at least 1",
-    "any.required": "Item quantity is required",
-  }),
-  price: Joi.number().min(0).required().messages({
-    "number.base": "Item price must be a number",
-    "number.min": "Item price cannot be negative",
-    "any.required": "Item price is required",
-  }),
+  foodId: objectIdSchema.optional(),
+  name: Joi.string().trim().required(),
+  size: Joi.string().trim().optional(),
+  quantity: Joi.number().integer().min(1).required(),
+  price: Joi.number().min(0).required(),
 });
 
-// Validate a new order submission (POST /AddOrder)
 export const addOrderSchema = Joi.object({
-  userId: Joi.string().optional(),
-  restaurantId: Joi.string().optional(),
+  userId: objectIdSchema.optional(),
 
-  address: Joi.string().required().messages({
-    "string.empty": "Delivery address is required",
-    "any.required": "Delivery address is required",
-  }),
+  restaurantId: objectIdSchema.optional(),
+
+  items: Joi.array()
+    .items(orderItemSchema)
+    .min(1)
+    .required(),
+
+  deliveryAddress: Joi.string()
+    .trim()
+    .min(5)
+    .required(),
 
   phoneNumber: Joi.string()
-    .pattern(/^[0-9+\-\s()]{7,15}$/)
-    .required()
-    .messages({
-      "string.empty": "Phone number is required",
-      "string.pattern.base": "Phone number format is invalid",
-      "any.required": "Phone number is required",
-    }),
+    .trim()
+    .min(7)
+    .max(20)
+    .required(),
 
-  totalPrice: Joi.number().min(0).required().messages({
-    "number.base": "Total price must be a number",
-    "number.min": "Total price cannot be negative",
-    "any.required": "Total price is required",
-  }),
+  deliveryLocation: Joi.object({
+    latitude: Joi.number().required(),
+    longitude: Joi.number().required(),
+  }).optional(),
 
-  items: Joi.array().items(orderItemSchema).min(1).required().messages({
-    "array.base": "Items must be an array",
-    "array.min": "Order must have at least one item",
-    "any.required": "Order items are required",
-  }),
+  subtotal: Joi.number()
+    .min(0)
+    .required(),
 
-  paymentMethod: Joi.string().valid("CASH", "CARD", "ONLINE").default("CASH"),
-  notes: Joi.string().optional().allow(""),
+  deliveryFee: Joi.number()
+    .min(0)
+    .required(),
+
+  totalAmount: Joi.number()
+    .min(0)
+    .required(),
+
+  paymentMethod: Joi.string()
+    .valid(...Object.values(PaymentMethod))
+    .default(PaymentMethod.CASH),
+
+  notes: Joi.string()
+    .trim()
+    .max(500)
+    .optional(),
 });
 
-// Validate status update (PATCH /status/:id)
-export const updateStatusSchema = Joi.object({
+export const updateOrderStatusSchema = Joi.object({
   status: Joi.string()
-    .valid(
-      "PENDING",
-      "CONFIRMED",
-      "PREPARING",
-      "READY_FOR_PICKUP",
-      "OUT_FOR_DELIVERY",
-      "DELIVERED",
-      "CANCELLED"
-    )
-    .required()
-    .messages({
-      "any.only": "Invalid order status",
-      "any.required": "Status is required",
-    }),
+    .valid(...Object.values(OrderStatus))
+    .required(),
 });
 
-// Validate driver assignment (PATCH /assign-driver/:id)
 export const assignDriverSchema = Joi.object({
-  driverId: Joi.string().required().messages({
-    "string.empty": "Driver ID is required",
-    "any.required": "Driver ID is required",
-  }),
-  estimatedDeliveryTime: Joi.number().integer().min(1).optional().messages({
-    "number.min": "Estimated delivery time must be at least 1 minute",
-  }),
+  driverId: objectIdSchema.required(),
+
+  estimatedDeliveryTime: Joi.date()
+    .iso()
+    .optional(),
 });
 
-// Validate payment status update (PATCH /payment/:id)
 export const updatePaymentSchema = Joi.object({
-  paymentStatus: Joi.string().valid("UNPAID", "PAID", "REFUNDED").required().messages({
-    "any.only": "Invalid payment status",
-    "any.required": "Payment status is required",
-  }),
-  paymentMethod: Joi.string().valid("CASH", "CARD", "ONLINE").optional(),
+  paymentStatus: Joi.string()
+    .valid(...Object.values(PaymentStatus))
+    .required(),
+
+  paymentMethod: Joi.string()
+    .valid(...Object.values(PaymentMethod))
+    .optional(),
 });

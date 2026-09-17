@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protect } from "../../middleware/auth.middleware";
+
 import {
   AddOrder,
   getOrders,
@@ -15,40 +15,70 @@ import {
 
 const router = Router();
 
-// ─── Public / Mobile App Routes ───────────────────────────────────────────────
+/**
+ * Create order
+ * POST /orders
+ */
+router.post("/", AddOrder);
 
-// POST   /api/order/AddOrder       → place a new order (mobile client endpoint)
-router.post("/AddOrder", AddOrder);
+/**
+ * Get all orders
+ * GET /orders
+ *
+ * Optional query:
+ * GET /orders?status=PENDING
+ */
+router.get("/", getOrders);
 
-// ─── Authenticated Customer Routes ───────────────────────────────────────────
+/**
+ * Get orders belonging to a user
+ * GET /orders/user/:userId
+ */
+router.get("/user/:userId", getMyOrders);
 
-// GET    /api/order/myOrders       → get logged-in user's order history
-router.get("/myOrders", protect, getMyOrders);
+/**
+ * Get pending orders belonging to a user
+ * GET /orders/user/:userId/pending
+ */
+router.get(
+  "/user/:userId/pending",
+  getPendingOrdersByUser
+);
 
-// PATCH  /api/order/cancel/:id     → cancel an order (customer)
-router.patch("/cancel/:id", protect, cancelOrderHandler);
+/**
+ * Get one order
+ * GET /orders/:id
+ */
+router.get("/:id", getOrder);
 
-// ─── Restaurant / Admin Routes ────────────────────────────────────────────────
+/**
+ * Update order status
+ * PATCH /orders/:id/status
+ */
+router.patch("/:id/status", updateStatus);
 
-// GET    /api/order/getAll         → get all orders with optional query filters
-//        ?status=PENDING&userId=xxx&restaurantId=xxx&driverId=xxx
-router.get("/getAll", protect, getOrders);
+/**
+ * Assign driver
+ * PATCH /orders/:id/driver
+ */
+router.patch("/:id/driver", assignDriver);
 
-// GET    /api/order/getById/:id    → get a specific order by ID
-router.get("/getById/:id", protect, getOrder);
+/**
+ * Update payment status
+ * PATCH /orders/:id/payment
+ */
+router.patch("/:id/payment", updatePayment);
 
-// PATCH  /api/order/status/:id     → update order status lifecycle
-router.patch("/status/:id", protect, updateStatus);
+/**
+ * Cancel order
+ * PATCH /orders/:id/cancel
+ */
+router.patch("/:id/cancel", cancelOrderHandler);
 
-// PATCH  /api/order/assign-driver/:id → assign a driver to an order
-router.patch("/assign-driver/:id", protect, assignDriver);
-
-// PATCH  /api/order/payment/:id   → update payment status
-router.patch("/payment/:id", protect, updatePayment);
-
-// DELETE /api/order/delete/:id    → hard delete (admin only)
-router.delete("/delete/:id", protect, deleteOrderHandler);
-
-router.get("/pending/:userId", getPendingOrdersByUser);
+/**
+ * Delete order
+ * DELETE /orders/:id
+ */
+router.delete("/:id", deleteOrderHandler);
 
 export default router;

@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
+
 import {
   addOrderSchema,
-  updateStatusSchema,
+  updateOrderStatusSchema,
   assignDriverSchema,
   updatePaymentSchema,
 } from "./order.validation";
+
 import {
   createOrder,
   getAllOrders,
@@ -18,274 +21,601 @@ import {
   getAllPendingOrdersByUserId,
 } from "./order.service";
 
-// add prder
-// Mobile client: AddOrderDetails.tsx → sends { address, phoneNumber, totalPrice, items }
-export async function AddOrder(req: Request, res: Response) {
+import {
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "./order.interface";
+
+/**
+ * Safely extract a route parameter as a string.
+ */
+const getParamString = (
+  value: string | string[] | undefined
+): string | null => {
+  return typeof value === "string" ? value : null;
+};
+
+/**
+ * Get authenticated user ID.
+ */
+const getAuthenticatedUserId = (req: Request): string | null => {
+  const user = (req as Request & {
+    user?: {
+      id?: string;
+      _id?: string;
+      userId?: string;
+    };
+  }).user;
+
+  if (!user) {
+    return null;
+  }
+
+  return user.id || user._id || user.userId || null;
+};
+
+/**
+ * Convert unknown errors into readable messages.
+ */
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Something went wrong";
+};
+
+/**
+ * Validate MongoDB ObjectId.
+ */
+const isValidObjectId = (id: string): boolean => {
+  return mongoose.Types.ObjectId.isValid(id);
+};
+
+/**
+ * Create order
+ */
+export const AddOrder = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const { error, value } = addOrderSchema.validate(req.body, {
       abortEarly: false,
+      stripUnknown: true,
     });
+
     if (error) {
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: error.details.map((d) => d.message),
+        errors: error.details.map((detail) => detail.message),
       });
     }
 
-    // Attach authenticated user if token present
-    const userId = (req as any).user?.id || value.userId || null;
+    const authenticatedUserId = getAuthenticatedUserId(req);
+    const userId = authenticatedUserId || value.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication is required",
+      });
+    }
+
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    if (
+      value.restaurantId &&
+      !isValidObjectId(value.restaurantId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid restaurant ID",
+      });
+    }
 
     const order = await createOrder({
       userId,
-      restaurantId: value.restaurantId || null,
-      address: value.address,
-      phoneNumber: value.phoneNumber,
-      totalPrice: value.totalPrice,
+      restaurantId: value.restaurantId,
       items: value.items,
-      paymentMethod: value.paymentMethod,
+      deliveryAddress: value.deliveryAddress,
+      phoneNumber: value.phoneNumber,
+      deliveryLocation: value.deliveryLocation,
+      subtotal: value.subtotal,
+      deliveryFee: value.deliveryFee,
+      totalAmount: value.totalAmount,
+      paymentMethod: value.paymentMethod as PaymentMethod,
       notes: value.notes,
     });
 
     return res.status(201).json({
       success: true,
-      message: "Order placed successfully",
+      message: "Order created successfully",
       data: order,
     });
-  } catch (error: any) {
-    console.error("AddOrder Error:", error);
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to place order",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// get all orders
-export async function getOrders(req: Request, res: Response) {
+/**
+ * Get all orders
+ */
+export const GetAllOrders = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const { status, userId, restaurantId, driverId } = req.query;
+    const status = req.query.status;
 
-    const orders = await getAllOrders({
-      status: status as string | undefined,
-      userId: userId as string | undefined,
-      restaurantId: restaurantId as string | undefined,
-      driverId: driverId as string | undefined,
-    });
+    let orders;
+
+    if (typeof status === "string") {
+      if (
+        !Object.values(OrderStatus).includes(
+          status as OrderStatus
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid order status",
+        });
+      }
+
+      orders = await getAllOrders(status as any);
+    } else {
+      orders = await getAllOrders(status as any);
+    }
 
     return res.status(200).json({
       success: true,
-      count: orders.length,
+      message: "Orders retrieved successfully",
       data: orders,
     });
-  } catch (error: any) {
-    console.error("getOrders Error:", error);
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to get orders",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// get orderby id
-export async function getOrder(req: Request, res: Response) {
+/**
+ * Get order by ID
+ */
+export const GetOrderById = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const order = await getOrderById(req.params.id as any);
+    const id = getParamString(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const order = await getOrderById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
+      message: "Order retrieved successfully",
       data: order,
     });
-  } catch (error: any) {
-    console.error("getOrder Error:", error);
-    const statusCode = error.message === "Order not found" ? 404 : 500;
-    return res.status(statusCode).json({
+  } catch (error: unknown) {
+    return res.status(500).json({
       success: false,
-      message: error.message || "Failed to get order",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// get my order
-// Uses the authenticated user's ID from the JWT token
-export async function getMyOrders(req: Request, res: Response) {
+/**
+ * Get orders by user ID
+ */
+export const GetOrdersByUser = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = getParamString(req.params.userId);
+
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
     }
 
     const orders = await getOrdersByUser(userId);
 
     return res.status(200).json({
       success: true,
-      count: orders.length,
+      message: "User orders retrieved successfully",
       data: orders,
     });
-  } catch (error: any) {
-    console.error("getMyOrders Error:", error);
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to get your orders",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// update status
-export async function updateStatus(req: Request, res: Response) {
+/**
+ * Update order status
+ */
+export const UpdateOrderStatus = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const { error, value } = updateStatusSchema.validate(req.body);
+    const id = getParamString(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const { error, value } = updateOrderStatusSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+        stripUnknown: true,
+      }
+    );
+
     if (error) {
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: error.details.map((d) => d.message),
+        errors: error.details.map((detail) => detail.message),
       });
     }
 
-    const order = await updateOrderStatus(req.params.id as any, value.status);
+    const order = await updateOrderStatus(
+      id,
+      value.status as OrderStatus
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: `Order status updated to ${value.status}`,
+      message: "Order status updated successfully",
       data: order,
     });
-  } catch (error: any) {
-    console.error("updateStatus Error:", error);
-    const statusCode = error.message === "Order not found" ? 404 : 500;
-    return res.status(statusCode).json({
+  } catch (error: unknown) {
+    return res.status(400).json({
       success: false,
-      message: error.message || "Failed to update order status",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// assign Driver
-export async function assignDriver(req: Request, res: Response) {
+/**
+ * Assign driver to order
+ */
+export const AssignDriverToOrder = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const { error, value } = assignDriverSchema.validate(req.body);
+    const id = getParamString(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const { error, value } = assignDriverSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+        stripUnknown: true,
+      }
+    );
+
     if (error) {
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: error.details.map((d) => d.message),
+        errors: error.details.map((detail) => detail.message),
       });
     }
 
-    const order = await assignDriverToOrder(
-      req.params.id as any,
-      value.driverId,
-      value.estimatedDeliveryTime,
-    );
+    const driverId = value.driverId;
+
+    if (!isValidObjectId(driverId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid driver ID",
+      });
+    }
+
+    const order = await assignDriverToOrder(id, driverId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
       message: "Driver assigned successfully",
       data: order,
     });
-  } catch (error: any) {
-    console.error("assignDriver Error:", error);
-    const statusCode = error.message.includes("not found")
-      ? 404
-      : error.message.includes("not available")
-        ? 400
-        : 500;
-    return res.status(statusCode).json({
+  } catch (error: unknown) {
+    return res.status(400).json({
       success: false,
-      message: error.message || "Failed to assign driver",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// update payment
-export async function updatePayment(req: Request, res: Response) {
+/**
+ * Update payment status
+ */
+export const UpdatePaymentStatus = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const { error, value } = updatePaymentSchema.validate(req.body);
+    const id = getParamString(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const { error, value } = updatePaymentSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+        stripUnknown: true,
+      }
+    );
+
     if (error) {
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: error.details.map((d) => d.message),
+        errors: error.details.map((detail) => detail.message),
       });
     }
 
     const order = await updatePaymentStatus(
-      req.params.id as any,
-      value.paymentStatus,
-      value.paymentMethod,
+      id,
+      value.paymentStatus as PaymentStatus,
+      value.paymentMethod as PaymentMethod | undefined
     );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: `Payment status updated to ${value.paymentStatus}`,
+      message: "Payment status updated successfully",
       data: order,
     });
-  } catch (error: any) {
-    console.error("updatePayment Error:", error);
-    return res.status(500).json({
+  } catch (error: unknown) {
+    return res.status(400).json({
       success: false,
-      message: error.message || "Failed to update payment",
+      message: getErrorMessage(error),
     });
   }
-}
+};
 
-// cancel order
-export async function cancelOrderHandler(req: Request, res: Response) {
+/**
+ * Cancel order
+ */
+export const CancelOrder = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
-    const order = await cancelOrder(req.params.id as any);
+    const id = getParamString(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const order = await cancelOrder(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
       message: "Order cancelled successfully",
       data: order,
     });
-  } catch (error: any) {
-    console.error("cancelOrder Error:", error);
-    const statusCode =
-      error.message === "Order not found"
-        ? 404
-        : error.message.includes("Cannot cancel")
-          ? 400
-          : 500;
-    return res.status(statusCode).json({
+  } catch (error: unknown) {
+    return res.status(400).json({
       success: false,
-      message: error.message || "Failed to cancel order",
-    });
-  }
-}
-
-//  delete
-export async function deleteOrderHandler(req: Request, res: Response) {
-  try {
-    const result = await deleteOrder(req.params.id as any);
-
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-    });
-  } catch (error: any) {
-    console.error("deleteOrder Error:", error);
-    const statusCode = error.message === "Order not found" ? 404 : 500;
-    return res.status(statusCode).json({
-      success: false,
-      message: error.message || "Failed to delete order",
-    });
-  }
-}
-
-// get pending order by user id
-export const getPendingOrdersByUser = async (req: Request, res: Response) => {
-  try {
-    const orders = await getAllPendingOrdersByUserId(req.params.userId as any);
-
-    res.status(200).json({
-      success: true,
-      data: orders,
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
+      message: getErrorMessage(error),
     });
   }
 };
+
+/**
+ * Delete order
+ */
+export const DeleteOrder = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const id = getParamString(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const result = await deleteOrder(id);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: getErrorMessage(error),
+    });
+  }
+};
+
+/**
+ * Get pending orders by user ID
+ */
+export const GetAllPendingOrdersByUserId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId = getParamString(req.params.userId);
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const orders = await getAllPendingOrdersByUserId(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Pending orders retrieved successfully",
+      data: orders,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: getErrorMessage(error),
+    });
+  }
+};
+
+/**
+ * Aliases required by order.routes.ts
+ */
+export const getOrders = GetAllOrders;
+export const getOrder = GetOrderById;
+export const getMyOrders = GetOrdersByUser;
+export const updateStatus = UpdateOrderStatus;
+export const assignDriver = AssignDriverToOrder;
+export const updatePayment = UpdatePaymentStatus;
+export const cancelOrderHandler = CancelOrder;
+export const deleteOrderHandler = DeleteOrder;
+export const getPendingOrdersByUser = GetAllPendingOrdersByUserId;

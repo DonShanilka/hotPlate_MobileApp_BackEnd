@@ -1,117 +1,166 @@
 import mongoose, { Schema } from "mongoose";
-import { IOrder } from "./order.interface";
+import {
+  IOrder,
+  IOrderItem,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "./order.interface";
 
-// Sub-schema for individual order items
-const orderItemSchema = new Schema(
+/**
+ * Order item schema
+ */
+const orderItemSchema = new Schema<IOrderItem>(
   {
+    foodId: {
+      type: Schema.Types.ObjectId,
+      ref: "Food",
+      required: false,
+    },
+
     name: {
       type: String,
       required: true,
+      trim: true,
     },
+
     size: {
       type: String,
+      required: false,
+      trim: true,
     },
+
     quantity: {
       type: Number,
       required: true,
       min: 1,
     },
+
     price: {
       type: Number,
       required: true,
       min: 0,
     },
   },
-  { _id: false }, // No separate _id for sub-documents
+  {
+    _id: false,
+  },
 );
 
+/**
+ * Order schema
+ */
 const orderSchema = new Schema<IOrder>(
   {
-    // Optional references – allows guest and authenticated orders
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
-      default: null,
+      required: true,
     },
 
     restaurantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Restaurant",
+      required: false,
       default: null,
     },
 
     driverId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Driver",
+      required: false,
       default: null,
     },
 
-    // Cart items from the mobile client
     items: {
       type: [orderItemSchema],
       required: true,
       validate: {
-        validator: (arr: any[]) => arr.length > 0,
+        validator: (items: IOrderItem[]) => items.length > 0,
         message: "Order must contain at least one item",
       },
     },
 
-    // Delivery information
-    address: {
+    deliveryAddress: {
       type: String,
       required: true,
+      trim: true,
     },
 
     phoneNumber: {
       type: String,
       required: true,
+      trim: true,
     },
 
-    totalPrice: {
+    deliveryLocation: {
+      latitude: {
+        type: Number,
+        required: false,
+      },
+      longitude: {
+        type: Number,
+        required: false,
+      },
+    },
+
+    subtotal: {
+      type: Number,
+      required: false,
+      min: 0,
+      default: 0,
+    },
+
+    deliveryFee: {
+      type: Number,
+      required: false,
+      min: 0,
+      default: 0,
+    },
+
+    totalAmount: {
       type: Number,
       required: true,
       min: 0,
     },
 
-    // Order lifecycle status
     status: {
       type: String,
-      enum: [
-        "PENDING",
-        "CONFIRMED",
-        "PREPARING",
-        "READY_FOR_PICKUP",
-        "OUT_FOR_DELIVERY",
-        "DELIVERED",
-        "CANCELLED",
-      ],
-      default: "PENDING",
+      enum: Object.values(OrderStatus),
+      default: OrderStatus.PENDING,
+      required: true,
     },
 
-    // Payment info
     paymentStatus: {
       type: String,
-      enum: ["UNPAID", "PAID", "REFUNDED"],
-      default: "UNPAID",
+      enum: Object.values(PaymentStatus),
+      default: PaymentStatus.PENDING,
+      required: true,
     },
 
     paymentMethod: {
       type: String,
-      enum: ["CASH", "CARD", "ONLINE"],
-      default: "CASH",
-    },
-
-    // Extra fields
-    notes: {
-      type: String,
+      enum: Object.values(PaymentMethod),
+      default: PaymentMethod.CASH,
+      required: true,
     },
 
     estimatedDeliveryTime: {
-      type: Number, // minutes
+      type: Number,
+      required: false,
+      min: 1,
     },
 
     deliveredAt: {
       type: Date,
+      required: false,
+    },
+
+    notes: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
     },
   },
   {
@@ -119,4 +168,4 @@ const orderSchema = new Schema<IOrder>(
   },
 );
 
-export default mongoose.model<IOrder>("Order", orderSchema);
+export const Order = mongoose.model<IOrder>("Order", orderSchema);
