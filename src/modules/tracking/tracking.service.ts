@@ -1,12 +1,10 @@
 import { Tracking } from "./tracking.model";
 import { Order } from "../order/order.model";
 import { UpdateDriverLocationDTO } from "./tracking.types";
+import { AnyARecord } from "dns";
 
 export class TrackingService {
-  async updateDriverLocation(
-    driverId: string,
-    data: UpdateDriverLocationDTO
-  ) {
+  async updateDriverLocation(driverId: string, data: UpdateDriverLocationDTO) {
     const order = await Order.findById(data.orderId);
 
     if (!order) {
@@ -16,18 +14,15 @@ export class TrackingService {
     // Important:
     // Verify that this driver is assigned to this order.
     if (String(order.driverId) !== driverId) {
-      throw new Error(
-        "Driver is not assigned to this order"
-      );
+      throw new Error("Driver is not assigned to this order");
     }
 
     if (
-      !["DRIVER_ASSIGNED", "PICKED_UP", "DELIVERING", "ARRIVED"]
-        .includes(order.status)
+      !["DRIVER_ASSIGNED", "PICKED_UP", "DELIVERING", "ARRIVED"].includes(
+        order.status,
+      )
     ) {
-      throw new Error(
-        "Tracking is not available for this order status"
-      );
+      throw new Error("Tracking is not available for this order status");
     }
 
     const tracking = await Tracking.findOneAndUpdate(
@@ -48,16 +43,13 @@ export class TrackingService {
       {
         upsert: true,
         new: true,
-      }
+      },
     );
 
     return tracking;
   }
 
-  async getOrderTracking(
-    orderId: string,
-    customerId: string
-  ) {
+  async getOrderTracking(orderId: any, customerId: any) {
     const order = await Order.findById(orderId);
 
     if (!order) {
@@ -86,7 +78,7 @@ export class TrackingService {
     return Tracking.findOneAndUpdate(
       { orderId },
       { isActive: false },
-      { new: true }
+      { new: true },
     );
   }
 }

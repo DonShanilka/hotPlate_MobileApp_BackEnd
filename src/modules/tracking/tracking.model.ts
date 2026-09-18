@@ -63,10 +63,7 @@ const trackingSchema = new Schema<ITracking>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Tracking = mongoose.model<ITracking>(
-  "Tracking",
-  trackingSchema
-);
+export const Tracking = mongoose.model<ITracking>("Tracking", trackingSchema);

@@ -7,9 +7,7 @@ import {
   PaymentStatus,
 } from "./order.interface";
 
-/**
- * Order item schema
- */
+// OrderItemSchema
 const orderItemSchema = new Schema<IOrderItem>(
   {
     foodId: {
@@ -47,9 +45,7 @@ const orderItemSchema = new Schema<IOrderItem>(
   },
 );
 
-/**
- * Order schema
- */
+// Order Schema
 const orderSchema = new Schema<IOrder>(
   {
     userId: {

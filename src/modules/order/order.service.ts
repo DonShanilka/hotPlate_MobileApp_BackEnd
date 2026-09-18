@@ -7,9 +7,7 @@ import {
   PaymentStatus,
 } from "./order.interface";
 
-/**
- * Convert unknown errors into a readable message
- */
+// Convert unknown errors into a readable message
 function getErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) {
     return error.message;
@@ -18,9 +16,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-/**
- * Create order
- */
+// Create Order
 export async function createOrder(data: Partial<IOrder>) {
   try {
     const order = await Order.create(data);
@@ -37,9 +33,7 @@ export async function createOrder(data: Partial<IOrder>) {
   }
 }
 
-/**
- * Get all orders
- */
+// Get All Order
 export async function getAllOrders(filters: {
   status?: OrderStatus;
   userId?: string;
@@ -82,9 +76,7 @@ export async function getAllOrders(filters: {
   }
 }
 
-/**
- * Get order by ID
- */
+// Get order by ID
 export async function getOrderById(id: string) {
   try {
     const order = await Order.findById(id)
@@ -107,9 +99,7 @@ export async function getOrderById(id: string) {
   }
 }
 
-/**
- * Get orders by user ID
- */
+// Get orders by user ID
 export async function getOrdersByUser(userId: string) {
   try {
     const orders = await Order.find({ userId })
@@ -128,9 +118,7 @@ export async function getOrdersByUser(userId: string) {
   }
 }
 
-/**
- * Update order status
- */
+// Update order status
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
@@ -209,9 +197,7 @@ export async function updateOrderStatus(
   }
 }
 
-/**
- * Assign driver to order
- */
+// Assign driver to order
 export async function assignDriverToOrder(
   orderId: string,
   driverId: string,
@@ -326,9 +312,7 @@ export async function assignDriverToOrder(
   }
 }
 
-/**
- * Update payment status
- */
+// Update Payment Status
 export async function updatePaymentStatus(
   orderId: string,
   paymentStatus: PaymentStatus,
@@ -382,9 +366,7 @@ export async function updatePaymentStatus(
   }
 }
 
-/**
- * Cancel order
- */
+// Cancel Order
 export async function cancelOrder(orderId: string) {
   try {
     const order = await Order.findById(orderId).exec();
@@ -453,9 +435,7 @@ export async function cancelOrder(orderId: string) {
   }
 }
 
-/**
- * Delete order
- */
+// Delete Order
 export async function deleteOrder(orderId: string) {
   try {
     const order = await Order.findById(orderId).exec();
@@ -495,9 +475,7 @@ export async function deleteOrder(orderId: string) {
   }
 }
 
-/**
- * Get pending orders by user ID
- */
+// Get pending orders by user ID
 export async function getAllPendingOrdersByUserId(
   userId: string,
 ) {

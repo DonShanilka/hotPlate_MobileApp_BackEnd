@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "./User";
 import { IUser } from "./User";
+import { generateToken } from "../../utils/jwt";
 
 function sanitizeUser(user: any) {
   const userObj = user.toObject ? user.toObject() : user;
@@ -55,12 +56,19 @@ export async function loginUser(email: string, password: string) {
       throw new Error("Invalid email or password");
     }
 
+    if (user.status !== "ACTIVE") {
+      throw new Error("User account is not active");
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new Error("Invalid email or password");
     }
 
-    return sanitizeUser(user);
+    return {
+      user: sanitizeUser(user),
+      token: generateToken(user.id),
+    };
   } catch (error: any) {
     console.error("Error Logging In User:", error);
     throw new Error(error.message || "Failed to login");

@@ -92,6 +92,29 @@ export const getSingleUser = async (req: Request, res: Response) => {
   }
 };
 
+// Get the authenticated user's profile
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const user = await getUserById(req.user.id);
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error: any) {
+    res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // Update user (single or multiple fields)
 export const update = async (req: Request, res: Response) => {
   try {

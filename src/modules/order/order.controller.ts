@@ -21,32 +21,30 @@ import {
   getAllPendingOrdersByUserId,
 } from "./order.service";
 
-import {
-  OrderStatus,
-  PaymentMethod,
-  PaymentStatus,
-} from "./order.interface";
+import { OrderStatus, PaymentMethod, PaymentStatus } from "./order.interface";
 
-/**
- * Safely extract a route parameter as a string.
- */
+
+// Safely extract a route parameter as a string.
+
 const getParamString = (
-  value: string | string[] | undefined
+  value: string | string[] | undefined,
 ): string | null => {
   return typeof value === "string" ? value : null;
 };
 
-/**
- * Get authenticated user ID.
- */
+
+// Get authenticated user ID.
+
 const getAuthenticatedUserId = (req: Request): string | null => {
-  const user = (req as Request & {
-    user?: {
-      id?: string;
-      _id?: string;
-      userId?: string;
-    };
-  }).user;
+  const user = (
+    req as Request & {
+      user?: {
+        id?: string;
+        _id?: string;
+        userId?: string;
+      };
+    }
+  ).user;
 
   if (!user) {
     return null;
@@ -55,9 +53,8 @@ const getAuthenticatedUserId = (req: Request): string | null => {
   return user.id || user._id || user.userId || null;
 };
 
-/**
- * Convert unknown errors into readable messages.
- */
+
+// Convert unknown errors into readable messages.
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;
@@ -66,19 +63,15 @@ const getErrorMessage = (error: unknown): string => {
   return "Something went wrong";
 };
 
-/**
- * Validate MongoDB ObjectId.
- */
+// Validate MongoDB ObjectId.
 const isValidObjectId = (id: string): boolean => {
   return mongoose.Types.ObjectId.isValid(id);
 };
 
-/**
- * Create order
- */
+// create order
 export const AddOrder = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const { error, value } = addOrderSchema.validate(req.body, {
@@ -111,10 +104,7 @@ export const AddOrder = async (
       });
     }
 
-    if (
-      value.restaurantId &&
-      !isValidObjectId(value.restaurantId)
-    ) {
+    if (value.restaurantId && !isValidObjectId(value.restaurantId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid restaurant ID",
@@ -148,12 +138,10 @@ export const AddOrder = async (
   }
 };
 
-/**
- * Get all orders
- */
+// Get All Orders
 export const GetAllOrders = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const status = req.query.status;
@@ -161,11 +149,7 @@ export const GetAllOrders = async (
     let orders;
 
     if (typeof status === "string") {
-      if (
-        !Object.values(OrderStatus).includes(
-          status as OrderStatus
-        )
-      ) {
+      if (!Object.values(OrderStatus).includes(status as OrderStatus)) {
         return res.status(400).json({
           success: false,
           message: "Invalid order status",
@@ -190,12 +174,10 @@ export const GetAllOrders = async (
   }
 };
 
-/**
- * Get order by ID
- */
+// Get Order By Id
 export const GetOrderById = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const id = getParamString(req.params.id);
@@ -236,12 +218,10 @@ export const GetOrderById = async (
   }
 };
 
-/**
- * Get orders by user ID
- */
+// Get Order By User Id
 export const GetOrdersByUser = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const userId = getParamString(req.params.userId);
@@ -275,12 +255,10 @@ export const GetOrdersByUser = async (
   }
 };
 
-/**
- * Update order status
- */
+// Update Order Status
 export const UpdateOrderStatus = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const id = getParamString(req.params.id);
@@ -299,13 +277,10 @@ export const UpdateOrderStatus = async (
       });
     }
 
-    const { error, value } = updateOrderStatusSchema.validate(
-      req.body,
-      {
-        abortEarly: false,
-        stripUnknown: true,
-      }
-    );
+    const { error, value } = updateOrderStatusSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
     if (error) {
       return res.status(400).json({
@@ -315,10 +290,7 @@ export const UpdateOrderStatus = async (
       });
     }
 
-    const order = await updateOrderStatus(
-      id,
-      value.status as OrderStatus
-    );
+    const order = await updateOrderStatus(id, value.status as OrderStatus);
 
     if (!order) {
       return res.status(404).json({
@@ -340,12 +312,10 @@ export const UpdateOrderStatus = async (
   }
 };
 
-/**
- * Assign driver to order
- */
+// Assign driver to order
 export const AssignDriverToOrder = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const id = getParamString(req.params.id);
@@ -364,13 +334,10 @@ export const AssignDriverToOrder = async (
       });
     }
 
-    const { error, value } = assignDriverSchema.validate(
-      req.body,
-      {
-        abortEarly: false,
-        stripUnknown: true,
-      }
-    );
+    const { error, value } = assignDriverSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
     if (error) {
       return res.status(400).json({
@@ -411,12 +378,10 @@ export const AssignDriverToOrder = async (
   }
 };
 
-/**
- * Update payment status
- */
+// Update Payement Status
 export const UpdatePaymentStatus = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const id = getParamString(req.params.id);
@@ -435,13 +400,10 @@ export const UpdatePaymentStatus = async (
       });
     }
 
-    const { error, value } = updatePaymentSchema.validate(
-      req.body,
-      {
-        abortEarly: false,
-        stripUnknown: true,
-      }
-    );
+    const { error, value } = updatePaymentSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
     if (error) {
       return res.status(400).json({
@@ -454,7 +416,7 @@ export const UpdatePaymentStatus = async (
     const order = await updatePaymentStatus(
       id,
       value.paymentStatus as PaymentStatus,
-      value.paymentMethod as PaymentMethod | undefined
+      value.paymentMethod as PaymentMethod | undefined,
     );
 
     if (!order) {
@@ -477,12 +439,10 @@ export const UpdatePaymentStatus = async (
   }
 };
 
-/**
- * Cancel order
- */
+// Cancel Order
 export const CancelOrder = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const id = getParamString(req.params.id);
@@ -523,12 +483,10 @@ export const CancelOrder = async (
   }
 };
 
-/**
- * Delete order
- */
+// Delete Order
 export const DeleteOrder = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const id = getParamString(req.params.id);
@@ -568,12 +526,10 @@ export const DeleteOrder = async (
   }
 };
 
-/**
- * Get pending orders by user ID
- */
+// Get pending orders by user ID
 export const GetAllPendingOrdersByUserId = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     const userId = getParamString(req.params.userId);
@@ -607,9 +563,7 @@ export const GetAllPendingOrdersByUserId = async (
   }
 };
 
-/**
- * Aliases required by order.routes.ts
- */
+// Aliases required by order.routes.ts
 export const getOrders = GetAllOrders;
 export const getOrder = GetOrderById;
 export const getMyOrders = GetOrdersByUser;

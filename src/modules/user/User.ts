@@ -74,20 +74,23 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
-UserSchema.pre(["findOneAndUpdate", "updateOne", "updateMany"], function (next) {
-  const update = this.getUpdate() as Record<string, any>;
+UserSchema.pre(
+  ["findOneAndUpdate", "updateOne", "updateMany"],
+  function (next) {
+    const update = this.getUpdate() as Record<string, any>;
 
-  if (!update) {
-    return next();
-  }
+    if (!update) {
+      return next();
+    }
 
-  if (update.$set) {
-    update.$set.role = "CUSTOMER";
-  } else {
-    update.role = "CUSTOMER";
-  }
+    if (update.$set) {
+      update.$set.role = "CUSTOMER";
+    } else {
+      update.role = "CUSTOMER";
+    }
 
-  next();
-});
+    next();
+  },
+);
 
 export default mongoose.model<IUser>("User", UserSchema);

@@ -1,8 +1,5 @@
 import { Document, Types } from "mongoose";
 
-/**
- * Order status values
- */
 export enum OrderStatus {
   PENDING = "PENDING",
   CONFIRMED = "CONFIRMED",
@@ -17,9 +14,6 @@ export enum OrderStatus {
   CANCELLED = "CANCELLED",
 }
 
-/**
- * Payment status values
- */
 export enum PaymentStatus {
   PENDING = "PENDING",
   PAID = "PAID",
@@ -27,9 +21,6 @@ export enum PaymentStatus {
   REFUNDED = "REFUNDED",
 }
 
-/**
- * Payment method values
- */
 export enum PaymentMethod {
   CASH = "CASH",
   CASH_ON_DELIVERY = "CASH_ON_DELIVERY",
@@ -37,9 +28,6 @@ export enum PaymentMethod {
   ONLINE = "ONLINE",
 }
 
-/**
- * Order item
- */
 export interface IOrderItem {
   foodId?: Types.ObjectId;
   name: string;
@@ -48,17 +36,11 @@ export interface IOrderItem {
   price: number;
 }
 
-/**
- * Delivery location
- */
 export interface IDeliveryLocation {
   latitude: number;
   longitude: number;
 }
 
-/**
- * Order document
- */
 export interface IOrder extends Document {
   userId: Types.ObjectId;
   restaurantId?: Types.ObjectId | null;
