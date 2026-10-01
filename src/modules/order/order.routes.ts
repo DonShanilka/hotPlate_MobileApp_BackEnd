@@ -5,6 +5,7 @@ import {
   getOrders,
   getOrder,
   getMyOrders,
+  GetOrdersByDriverUserId,
   updateStatus,
   assignDriver,
   updatePayment,
@@ -19,6 +20,7 @@ router.post("/", AddOrder);
 router.get("/", getOrders);
 router.get("/user/:userId", getMyOrders);
 router.get("/user/:userId/pending", getPendingOrdersByUser);
+router.get("/driver/:userId", GetOrdersByDriverUserId);
 router.get("/:id", getOrder);
 router.patch("/:id/status", updateStatus);
 router.patch("/:id/driver", assignDriver);

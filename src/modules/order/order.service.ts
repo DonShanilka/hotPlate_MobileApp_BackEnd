@@ -118,6 +118,34 @@ export async function getOrdersByUser(userId: string) {
   }
 }
 
+// Resolve the driver's profile from their user ID, then get assigned orders.
+export async function getOrdersByDriverUserId(userId: string) {
+  try {
+    const driver = await Driver.findOne({ userId })
+      .select("_id")
+      .exec();
+
+    if (!driver) {
+      return [];
+    }
+
+    const orders = await Order.find({ driverId: driver._id })
+      .populate("userId", "first_name last_name email phone")
+      .populate("restaurantId", "name address phone")
+      .populate("driverId", "vehicleType vehicleNumber phone")
+      .sort({ createdAt: -1 })
+      .exec();
+
+    return orders;
+  } catch (error: unknown) {
+    console.error("Error getting driver orders:", error);
+
+    throw new Error(
+      getErrorMessage(error, "Failed to get driver orders"),
+    );
+  }
+}
+
 // Update order status
 export async function updateOrderStatus(
   orderId: string,

@@ -13,6 +13,7 @@ import {
   getAllOrders,
   getOrderById,
   getOrdersByUser,
+  getOrdersByDriverUserId,
   updateOrderStatus,
   assignDriverToOrder,
   updatePaymentStatus,
@@ -245,6 +246,43 @@ export const GetOrdersByUser = async (
     return res.status(200).json({
       success: true,
       message: "User orders retrieved successfully",
+      data: orders,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: getErrorMessage(error),
+    });
+  }
+};
+
+// Get orders assigned to the driver associated with a user ID
+export const GetOrdersByDriverUserId = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  try {
+    const userId = getParamString(req.params.userId);
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const orders = await getOrdersByDriverUserId(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Driver orders retrieved successfully",
       data: orders,
     });
   } catch (error: unknown) {

@@ -12,5 +12,4 @@ export interface IDriver {
   isAvailable?: boolean;
   isActive?: boolean;
   rating?: number;
-
 }
