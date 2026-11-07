@@ -1,7 +1,13 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware";
-import { createMenu, getMenu, getRestaurantMenus, updateMenu, deleteMenu } from "./menu.controller";
-import { getMenus } from "./menu.service";
+import {
+  createMenu,
+  getMenu,
+  getMenus,
+  getRestaurantMenus,
+  updateMenu,
+  deleteMenu,
+} from "./menu.controller";
 
 const router = express.Router();
 

@@ -1,4 +1,5 @@
 import Restaurant from "./restaurant.model";
+import Menu from "../menu/menu.model";
 import { IRestaurant } from "./restaurant.interface";
 
 // Create Restaurant
@@ -35,9 +36,19 @@ export async function getAllRestaurants() {
   try {
     const restaurants = await Restaurant.find()
       .populate("owner", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return restaurants;
+    const menus = await Menu.find({
+      restaurantId: { $in: restaurants.map((r) => r._id) },
+    }).lean();
+
+    return restaurants.map((r) => ({
+      ...r,
+      menuItems: menus.filter(
+        (m) => String(m.restaurantId) === String(r._id),
+      ),
+    }));
   } catch (error) {
     console.error("Error Getting Restaurants:", error);
     throw new Error("Failed to get restaurants");
@@ -47,16 +58,17 @@ export async function getAllRestaurants() {
 // Get Restaurant By ID
 export async function getRestaurantById(id: string) {
   try {
-    const restaurant = await Restaurant.findById(id).populate(
-      "owner",
-      "name email",
-    );
+    const restaurant = await Restaurant.findById(id)
+      .populate("owner", "name email")
+      .lean();
 
     if (!restaurant) {
       throw new Error("Restaurant not found");
     }
 
-    return restaurant;
+    const menuItems = await Menu.find({ restaurantId: id }).lean();
+
+    return { ...restaurant, menuItems };
   } catch (error) {
     console.error("Error Finding Restaurant:", error);
     throw new Error("Failed to get restaurant");

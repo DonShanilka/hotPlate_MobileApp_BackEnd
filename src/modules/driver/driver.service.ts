@@ -1,12 +1,12 @@
 import Driver from "./driver.model";
-// import User from "../user/User";
+import User from "../user/User";
 import { IDriver } from "./driver.interface";
 
 // Create Driver Profile
 export async function createDriver(driverData: IDriver) {
   try {
     // Verify Driver exists
-    const driver = await Driver.findById(driverData.userId);
+    const driver = await User.findById(driverData.userId);
     if (!driver) {
       throw new Error("Driver not found");
     }

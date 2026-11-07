@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -15,7 +16,7 @@ import { registerTrackingSocket } from "./src/modules/tracking/tracking.socket";
 
 const app = express();
 
-const mongoUrl = "mongodb://localhost:27017/HotPlate";
+const mongoUrl = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/hotplate";
 
 const httpServer = http.createServer(app);
 
@@ -69,12 +70,6 @@ app.use(
   }),
 );
 
-// MongoDB
-mongoose
-  .connect(mongoUrl)
-  .then(() => console.log("MongoDB Connected Successfully"))
-  .catch((err) => console.log("MongoDB Connection Error:", err));
-
 // Routes
 // app.use("/api", itemRoutes);
 // app.use("/api", orderRoutes);
@@ -85,7 +80,18 @@ app.use("/api/driver", driverRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/tracking", trackingRoutes);
 
-// Start Server
-app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
-});
+async function startServer() {
+  try {
+    await mongoose.connect(mongoUrl, { serverSelectionTimeoutMS: 5000 });
+    console.log("MongoDB Connected Successfully");
+
+    httpServer.listen(3000, () => {
+      console.log("🚀 Server running on http://localhost:3000");
+    });
+  } catch (error) {
+    console.error("MongoDB Connection Error:", error);
+    process.exit(1);
+  }
+}
+
+void startServer();

@@ -1,0 +1,829 @@
+{
+  "info": {
+    "_postman_id": "a38a2d68-23b0-47c7-8b3f-2647aec5939e",
+    "name": "Hotplate Backend API",
+    "description": "Import into Postman. Run the create requests after MongoDB is connected; they save through the backend API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "restaurantId",
+      "value": ""
+    },
+    {
+      "key": "driverId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.info.requestName === 'Register - Nimal Perera') {",
+          "  pm.collectionVariables.set('runId', Date.now().toString());",
+          "  pm.collectionVariables.unset('userId');",
+          "  pm.collectionVariables.unset('restaurantId');",
+          "  pm.collectionVariables.unset('driverId');",
+          "  pm.collectionVariables.unset('orderId');",
+          "  pm.collectionVariables.unset('token');",
+          "pm.collectionVariables.set('driverIds', JSON.stringify([]));",
+          "pm.collectionVariables.set('orderIds', JSON.stringify([]));",
+          "} else if (pm.info.requestName.startsWith('Assign Driver to Order ')) {",
+          "  const index = Number(pm.info.requestName.slice(-1)) - 1;",
+          "  const driverIds = JSON.parse(pm.collectionVariables.get('driverIds') || '[]');",
+          "  const orderIds = JSON.parse(pm.collectionVariables.get('orderIds') || '[]');",
+          "  pm.collectionVariables.set('driverId', driverIds[index] || '');",
+          "  pm.collectionVariables.set('orderId', orderIds[index] || '');",
+          "} else if (['Set Order 1 to Delivering', 'Update Driver Location', 'Get Order Tracking'].includes(pm.info.requestName)) {",
+          "  const orderIds = JSON.parse(pm.collectionVariables.get('orderIds') || '[]');",
+          "  pm.collectionVariables.set('orderId', orderIds[0] || '');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(pm.info.requestName + ' returns a successful response', function () {",
+          "  pm.expect(pm.response.code).to.be.within(200, 299);",
+          "});",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "  const response = pm.response.json();",
+          "  const data = response.data;",
+          "  if (pm.info.requestName === 'Register - Nimal Perera' && data?._id) pm.collectionVariables.set('userId', data._id);",
+          "  if (pm.info.requestName === 'Login' && data?.token) {",
+          "    pm.collectionVariables.set('token', data.token);",
+          "    pm.collectionVariables.set('userId', data.user._id);",
+          "  }",
+          "  if (pm.info.requestName === 'Create - Spice Garden' && data?._id) pm.collectionVariables.set('restaurantId', data._id);",
+          "  const rKey = {'Create - Pizza House':'pizzaRestaurantId','Create - Burger Hub':'burgerRestaurantId','Create - Rice Bowl':'riceRestaurantId'}[pm.info.requestName];",
+          "  if (rKey && data?._id) pm.collectionVariables.set(rKey, data._id);",
+          "if (['Create - Ruwan Silva', 'Create - Dilan Perera', 'Create - Tharindu Fernando', 'Create - Nuwan Jayasuriya'].includes(pm.info.requestName) && data?._id) {",
+          "    const driverIds = JSON.parse(pm.collectionVariables.get('driverIds') || '[]');",
+          "    driverIds.push(data._id);",
+          "    pm.collectionVariables.set('driverIds', JSON.stringify(driverIds));",
+          "  }",
+          "  if (pm.info.requestName.startsWith('Create Order ') && data?._id) {",
+          "    const orderIds = JSON.parse(pm.collectionVariables.get('orderIds') || '[]');",
+          "    orderIds.push(data._id);",
+          "    pm.collectionVariables.set('orderIds', JSON.stringify(orderIds));",
+          "  }",
+          "  if (pm.info.requestName.startsWith('Assign Driver to Order ')) {",
+          "    pm.test('Driver is assigned to this order', function () {",
+          "      pm.expect(data.driverId).to.exist;",
+          "      pm.expect(data.status).to.eql('OUT_FOR_DELIVERY');",
+          "    });",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Register - Nimal Perera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Nimal\",\n  \"last_name\": \"Perera\",\n  \"email\": \"nimal+{{runId}}@example.com\",\n  \"password\": \"Test@123\",\n  \"phone\": \"0771111111\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/register"
+          }
+        },
+        {
+          "name": "Register - Kasun Silva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Kasun\",\n  \"last_name\": \"Silva\",\n  \"email\": \"kasun+{{runId}}@example.com\",\n  \"password\": \"Test@123\",\n  \"phone\": \"0772222222\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/register"
+          }
+        },
+        {
+          "name": "Register - Amal Fernando",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Amal\",\n  \"last_name\": \"Fernando\",\n  \"email\": \"amal+{{runId}}@example.com\",\n  \"password\": \"Test@123\",\n  \"phone\": \"0773333333\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/register"
+          }
+        },
+        {
+          "name": "Register - Sahan Jayasuriya",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Sahan\",\n  \"last_name\": \"Jayasuriya\",\n  \"email\": \"sahan+{{runId}}@example.com\",\n  \"password\": \"Test@123\",\n  \"phone\": \"0774444444\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nimal+{{runId}}@example.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/login"
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/profile",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Nimal Updated\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants",
+      "item": [
+        {
+          "name": "Create - Spice Garden",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Spice Garden\",\n  \"description\": \"Sri Lankan home-style dishes\",\n  \"email\": \"spice+{{runId}}@example.com\",\n  \"phone\": \"0112001001\",\n  \"address\": \"Colombo 03\",\n  \"cuisine\": [\"Sri Lankan\"],\n  \"openingTime\": \"09:00\",\n  \"closingTime\": \"22:00\",\n  \"category\": \"Sri Lankan\",\n  \"owner\": \"{{userId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/resturent/create"
+          }
+        },
+        {
+          "name": "Create - Pizza House",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pizza House\",\n  \"description\": \"Freshly baked Italian pizzas\",\n  \"email\": \"pizza+{{runId}}@example.com\",\n  \"phone\": \"0112001002\",\n  \"address\": \"Colombo 05\",\n  \"cuisine\": [\"Italian\"],\n  \"openingTime\": \"10:00\",\n  \"closingTime\": \"23:00\",\n  \"category\": \"Italian\",\n  \"owner\": \"{{userId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/resturent/create"
+          }
+        },
+        {
+          "name": "Create - Burger Hub",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Burger Hub\",\n  \"description\": \"Burgers and quick meals\",\n  \"email\": \"burger+{{runId}}@example.com\",\n  \"phone\": \"0112001003\",\n  \"address\": \"Rajagiriya\",\n  \"cuisine\": [\"Fast Food\"],\n  \"openingTime\": \"11:00\",\n  \"closingTime\": \"23:00\",\n  \"category\": \"Fast Food\",\n  \"owner\": \"{{userId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/resturent/create"
+          }
+        },
+        {
+          "name": "Create - Rice Bowl",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rice Bowl\",\n  \"description\": \"Asian rice dishes\",\n  \"email\": \"rice+{{runId}}@example.com\",\n  \"phone\": \"0112001004\",\n  \"address\": \"Nugegoda\",\n  \"cuisine\": [\"Asian\"],\n  \"openingTime\": \"09:00\",\n  \"closingTime\": \"21:00\",\n  \"category\": \"Asian\",\n  \"owner\": \"{{userId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/resturent/create"
+          }
+        },
+        {
+          "name": "Get All Restaurants",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/resturent/getAll"
+          }
+        },
+        {
+          "name": "Get Restaurant by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/resturent/getById/{{restaurantId}}"
+          }
+        },
+        {
+          "name": "Update Restaurant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Spice Garden Updated\"\n}"
+            },
+            "url": "{{baseUrl}}/api/resturent/update/{{restaurantId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "item": [
+        {
+          "name": "Create - Chicken Kottu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chicken Kottu\",\n  \"description\": \"Chicken kottu with vegetables\",\n  \"price\": 1450,\n  \"restaurantId\": \"{{restaurantId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu/create"
+          }
+        },
+        {
+          "name": "Create - Chicken Pizza",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chicken Pizza\",\n  \"description\": \"Medium chicken pizza\",\n  \"price\": 2200,\n  \"restaurantId\": \"{{pizzaRestaurantId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu/create"
+          }
+        },
+        {
+          "name": "Create - Double Beef Burger",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Double Beef Burger\",\n  \"description\": \"Double beef patty burger\",\n  \"price\": 1650,\n  \"restaurantId\": \"{{burgerRestaurantId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu/create"
+          }
+        },
+        {
+          "name": "Create - Seafood Fried Rice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Seafood Fried Rice\",\n  \"description\": \"Fresh seafood fried rice\",\n  \"price\": 1800,\n  \"restaurantId\": \"{{riceRestaurantId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/menu/create"
+          }
+        },
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/menu/getAll"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "Create - Ruwan Silva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"vehicleType\": \"BIKE\",\n  \"vehicleNumber\": \"WP CAB-{{runId}}\",\n  \"licenseNumber\": \"DL-{{runId}}-01\",\n  \"phone\": \"0711111111\",\n  \"address\": \"Colombo 03\"\n}"
+            },
+            "url": "{{baseUrl}}/api/driver/register",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"kasun+{{runId}}@example.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/login"
+          }
+        },
+        {
+          "name": "Create - Dilan Perera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"vehicleType\": \"BIKE\",\n  \"vehicleNumber\": \"WP CAD-{{runId}}\",\n  \"licenseNumber\": \"DL-{{runId}}-02\",\n  \"phone\": \"0722222222\",\n  \"address\": \"Colombo 05\"\n}"
+            },
+            "url": "{{baseUrl}}/api/driver/register",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"amal+{{runId}}@example.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/login"
+          }
+        },
+        {
+          "name": "Create - Tharindu Fernando",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"vehicleType\": \"BIKE\",\n  \"vehicleNumber\": \"WP CAE-{{runId}}\",\n  \"licenseNumber\": \"DL-{{runId}}-03\",\n  \"phone\": \"0733333333\",\n  \"address\": \"Rajagiriya\"\n}"
+            },
+            "url": "{{baseUrl}}/api/driver/register",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sahan+{{runId}}@example.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/login"
+          }
+        },
+        {
+          "name": "Create - Nuwan Jayasuriya",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"vehicleType\": \"BIKE\",\n  \"vehicleNumber\": \"WP CAF-{{runId}}\",\n  \"licenseNumber\": \"DL-{{runId}}-04\",\n  \"phone\": \"0744444444\",\n  \"address\": \"Nugegoda\"\n}"
+            },
+            "url": "{{baseUrl}}/api/driver/register",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nimal+{{runId}}@example.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/login"
+          }
+        },
+        {
+          "name": "Get All Drivers",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/driver/getAll"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"restaurantId\": \"{{restaurantId}}\",\n  \"items\": [{ \"name\": \"Chicken Kottu\", \"quantity\": 1, \"price\": 1450 }],\n  \"subtotal\": 1450,\n  \"deliveryFee\": 300,\n  \"totalAmount\": 1750,\n  \"deliveryAddress\": \"Colombo 03\",\n  \"phoneNumber\": \"0771111111\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/"
+          }
+        },
+        {
+          "name": "Create Order 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"restaurantId\": \"{{restaurantId}}\",\n  \"items\": [{ \"name\": \"Chicken Pizza\", \"quantity\": 1, \"price\": 2200 }],\n  \"subtotal\": 2200,\n  \"deliveryFee\": 300,\n  \"totalAmount\": 2500,\n  \"deliveryAddress\": \"Colombo 05\",\n  \"phoneNumber\": \"0771111111\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/"
+          }
+        },
+        {
+          "name": "Create Order 3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"restaurantId\": \"{{restaurantId}}\",\n  \"items\": [{ \"name\": \"Double Beef Burger\", \"quantity\": 2, \"price\": 1650 }],\n  \"subtotal\": 3300,\n  \"deliveryFee\": 300,\n  \"totalAmount\": 3600,\n  \"deliveryAddress\": \"Rajagiriya\",\n  \"phoneNumber\": \"0771111111\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/"
+          }
+        },
+        {
+          "name": "Create Order 4",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"restaurantId\": \"{{restaurantId}}\",\n  \"items\": [{ \"name\": \"Seafood Fried Rice\", \"quantity\": 1, \"price\": 1800 }],\n  \"subtotal\": 1800,\n  \"deliveryFee\": 300,\n  \"totalAmount\": 2100,\n  \"deliveryAddress\": \"Nugegoda\",\n  \"phoneNumber\": \"0771111111\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/"
+          }
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/order/"
+          }
+        },
+        {
+          "name": "Assign Driver to Order 1",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/{{orderId}}/driver"
+          }
+        },
+        {
+          "name": "Assign Driver to Order 2",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/{{orderId}}/driver"
+          }
+        },
+        {
+          "name": "Assign Driver to Order 3",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/{{orderId}}/driver"
+          }
+        },
+        {
+          "name": "Assign Driver to Order 4",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driverId\": \"{{driverId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/{{orderId}}/driver"
+          }
+        },
+        {
+          "name": "Set Order 1 to Delivering",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERING\"\n}"
+            },
+            "url": "{{baseUrl}}/api/order/{{orderId}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tracking",
+      "item": [
+        {
+          "name": "Update Driver Location",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"latitude\": 6.9271,\n  \"longitude\": 79.8612\n}"
+            },
+            "url": "{{baseUrl}}/api/tracking/driver/location",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Tracking",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/tracking/orders/{{orderId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -157,9 +157,9 @@ export const GetAllOrders = async (
         });
       }
 
-      orders = await getAllOrders(status as any);
+      orders = await getAllOrders({ status: status as OrderStatus });
     } else {
-      orders = await getAllOrders(status as any);
+      orders = await getAllOrders({});
     }
 
     return res.status(200).json({
